@@ -7,8 +7,9 @@ Repo for modeling analysis of maize yield variability and tradeoffs between yiel
 
 ## Set-up
 1. ```cd maize-Toff```
-2. ```conda activate scibase```
-3. ```jupyter notebook```
+2. ```conda env create -f environment.yml -n maize```
+3. ```conda activate maize```
+4. ```jupyter notebook```
 
 ## Directory structure
 
