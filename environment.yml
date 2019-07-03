@@ -1,0 +1,7 @@
+name: maize
+dependencies:
+  - numpy
+  - pandas
+  - jupyter
+  - scipy
+  - matplotlib
