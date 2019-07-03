@@ -1,5 +1,5 @@
 # maize-Toff
-Repo for modeling analysis of of maize yield variability and tradeoffs between yield and crop failure.
+Repo for modeling analysis of maize yield variability and tradeoffs between yield and crop failure.
 
 ## Research questions
 1. What are the tradeoffs between yield (i.e. cultivar or variety selection), planting date, and crop failure?
@@ -7,14 +7,13 @@ Repo for modeling analysis of of maize yield variability and tradeoffs between y
 
 ## Set-up
 1. ```cd maize-Toff```
-2. ```conda env update --name maize-Toff --file RTR_copy/binder/environment.yml```
-2. ```conda activate maize-Toff```
+2. ```conda activate scibase```
 3. ```jupyter notebook```
 
 ## Directory structure
 
-### RTR_copy/
-* direct copy of RidgeToReef notebooks which contain model in Ch.3
+### py/
+* where models are stored
 
 ### dat/
 * contains CETRAD rainfall data, maize variety info, survey info...
