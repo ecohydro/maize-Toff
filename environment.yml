@@ -1,4 +1,4 @@
-name: maize
+name: maize-Toff
 dependencies:
   - numpy
   - pandas
