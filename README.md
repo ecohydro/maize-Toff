@@ -16,7 +16,10 @@ Repo for modeling analysis of maize yield variability and tradeoffs between yiel
 ### py/
 * where models are stored
 
-### dat/
+### data/
 * contains CETRAD rainfall data, maize variety info, survey info...
+
+### output/
+* exported figures, results, etc.
 
 Draft of manuscript [here](https://drive.google.com/drive/folders/1uRBOhii9ca5uGy2ntIhcAtsCL4PKBGq-?usp=sharing).
