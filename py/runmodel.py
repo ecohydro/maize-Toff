@@ -205,7 +205,6 @@ def calc_kc(fraction_of_season=None):
     # TODO: Fix this so kc varies throughout season.
     return 1.0
 
-
 # def calc_kc(x, mean=60, stand=20, pi=3.14159):
 #     """ Meant to calculate kc based on DOY but not
 #     yet working.
@@ -229,7 +228,10 @@ def calc_kc(fraction_of_season=None):
 #
 ######################################
 
-def runmodel():
+    
+
+
+def runmodel(n=0.4, Zr=500, ET_max=6.5):
     # INITIALIZE PARAMETERS FOR MODEL
     n = 0.4  # Porosity, [m3/m3]
     Zr = 500 # Rooting depth [mm]
