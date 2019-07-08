@@ -3,7 +3,7 @@
 #%% Set parameters related to soils and siginificant digits
 rho = 1000      # density of water in kg/m^3
 g = 9.8         # acceleration of gravity in m/s^2
-PRECISION =    # Number of decimal places of precision in calculations (default is 2)
+PRECISION = 2    # Number of decimal places of precision in calculations (default is 2)
 
 #%% DATA FROM CLAPP AND HORBERGER (C&H) 1978, Table 2:
 
