@@ -12,6 +12,12 @@ ORGANIZATION:   U.C. Santa Barbara
 Contact:        nkrell@ucsb.edu
 
 """
+    
+#%% Import Object Classes
+# This is super-weird, in that we are having to reference these from the root dir.
+# It will likely break later on, so look out.
+from py.climate import Climate
+from py.soil import Soil
 
 
 #%% IMPORT PACKAGES
@@ -21,49 +27,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-#%% DEFINE FUNCTIONS
-
-def calc_R(alpha, lambda_r, t_seas, n_seasons=1):
-    """
-    Calculates rainfall variable. 
-    Assume an exponential distribution of storm depth. Returns
-    amounts and number of rainy days [mm, days].
-    
-    Usage: calc_R(alpha, lambda_r, t_seas, n_seasons=1)
-        alpha = any number # Definition
-        lambda_r = any number # Definition
-        t_seas = some number greater than 0
-        n_seasons = some number greater than 0 # number of seasons
-
-    >>> calc_R()
-    Traceback (most recent call last):
-        ...
-    TypeError: calc_R() missing 3 required positional arguments: 'alpha', 'lambda_r', and 't_seas'
-    >>> calc_R(10,0,120,500)
-    Traceback (most recent call last):
-      ...
-    TypeError: object of type 'int' has no len()
-    
-    """
-    amounts = np.random.exponential(scale=alpha, size=[n_seasons, t_seas])
-    
-    # print('{lam} is not 1 and length {lam_len} is not {t_seas}'.format(
-    #    lam=lambda_r,
-    #    lam_len=len(lambda_r),
-    #    t_seas=t_seas))
-
-    if not isinstance(lambda_r, float):
-        if len(lambda_r) != t_seas:
-            raise ValueError("lamda_r values should be a constant, or have length of t_seas")
-    
-    rain_days = (np.random.uniform(low=0, high=1, size=[n_seasons, t_seas]) <= lambda_r).astype(int)
-    return amounts * rain_days
 
 
-#def valid_s(s):
-
-
-#   return True
 def calc_E(s, E_max, a=2):
     """ Calculates evaporation variable. 
         Based on relationship between evaporation and 
@@ -114,96 +79,82 @@ def calc_E_max(LAI, k=0.9, ET_max=6):
 
     return ET_max * exp(-k*LAI)
 
-def calc_LAI(kc, LAI_max=3.5, kc_max=1.2):
-    """ Calculates Leaf Area Index (LAI) variable. LAI comes
-        from function of kc. Currently based on linear relationship 
-        between kc and LAI (assumption).
+# def calc_LAI(kc, LAI_max=3.5, kc_max=1.2):
+#     """ Calculates Leaf Area Index (LAI) variable. LAI comes
+#         from function of kc. Currently based on linear relationship 
+#         between kc and LAI (assumption).
     
-    Usage: calc_LAI(kc, LAI_max, kc_max)
-        kc = some number # Crop coefficient
-        LAI_max = 3.5 # Max. LAI
-        kc_max = 1.2 # Max. crop coeff.
+#     Usage: calc_LAI(kc, LAI_max, kc_max)
+#         kc = some number # Crop coefficient
+#         LAI_max = 3.5 # Max. LAI
+#         kc_max = 1.2 # Max. crop coeff.
 
-    >>> calc_LAI(1)
-    2.916666666666667
+#     >>> calc_LAI(1)
+#     2.916666666666667
     
-    """
-    return (LAI_max/kc_max) * kc
+#     """
+#     return (LAI_max/kc_max) * kc
 
-def calc_T_max(kc, ET_max=6):
-    """ Calculates max. Transpiration variable.
+# def calc_T_max(kc, ET_max=6):
+#     """ Calculates max. Transpiration variable.
     
-    Usage: calc_T_max(kc, ET_max=6)
-        kc = some number # Crop coefficient
-        ET_max = 6 # max. Evapotranspiration [mm/day]
-    >>> calc_T_max(1)
-    6
+#     Usage: calc_T_max(kc, ET_max=6)
+#         kc = some number # Crop coefficient
+#         ET_max = 6 # max. Evapotranspiration [mm/day]
+#     >>> calc_T_max(1)
+#     6
 
-    """
-    return kc * ET_max
+#     """
+#     return kc * ET_max
 
-def calc_T(s, T_max, sw=0.3, s_star=0.6):
-    """ Calculates Transpiration variable as a stepwise
-        linear function.
+# def calc_T(s, T_max, sw=0.3, s_star=0.6):
+#     """ Calculates Transpiration variable as a stepwise
+#         linear function.
     
-    Usage: calc_T(s, T_max, sw=0.3, s_star=0.6)
-        Note: s must be a single-dimension array
-        s = some value # Relative soil moisture [mm/mm]
-        T_max = defined by a function [mm/unit time]
-        sw = 0.3 # Wilting point [mm]
-        s_star = 0.6 # Plant water satisfication [mm]
+#     Usage: calc_T(s, T_max, sw=0.3, s_star=0.6)
+#         Note: s must be a single-dimension array
+#         s = some value # Relative soil moisture [mm/mm]
+#         T_max = defined by a function [mm/unit time]
+#         sw = 0.3 # Wilting point [mm]
+#         s_star = 0.6 # Plant water satisfication [mm]
     
-    >>> calc_T(1.2,1)
-    Traceback (most recent call last):
-        ...
-    ValueError: s must be <= 1
-    >>> calc_T(0.5,1)
-    0.6666666666666667
-    >>> calc_T(0.2, 1, sw=0.3)
-    0
+#     >>> calc_T(1.2,1)
+#     Traceback (most recent call last):
+#         ...
+#     ValueError: s must be <= 1
+#     >>> calc_T(0.5,1)
+#     0.6666666666666667
+#     >>> calc_T(0.2, 1, sw=0.3)
+#     0
     
-    """
-    if not s <= 1:
-        raise ValueError("s must be <= 1")
-    if s>=s_star:
-        return T_max
-    elif s>=sw:
-        return (s-sw)/(s_star-sw)*T_max
-    else:
-        return 0
+#     """
+#     if not s <= 1:
+#         raise ValueError("s must be <= 1")
+#     if s>=s_star:
+#         return T_max
+#     elif s>=sw:
+#         return (s-sw)/(s_star-sw)*T_max
+#     else:
+#         return 0
 
-def calc_ET(s, kc, ET_max=6, sw=0.3, s_star=0.6):
+def calc_ET(s,plant=plant,climate=climate):
     """ Calculates Evapotranspiration (finally!)
     
-    Usage: calc_ET(s, kc, ET_max=6, sw=0.3, s_star=0.6)
+    Usage: calc_ET(s, plant=plant, climate=climate)
         Note: s must be a single-dimension array
         s = user input # Relative soil moisture [mm/mm]
-        kc = user input # Crop coefficient [Unitless]
-        ET_max = 6 # Max. Evapotranspiration [mm/day]
-        sw = 0.3 # Soil wilting point [mm]
-        s_star = 0.6 # Plant water satisfaction [mm]
-
-    >>> calc_ET(1.2,1)
-    Traceback (most recent call last):
-        ...
-    ValueError: s must be <= 1
-    >>> calc_ET(0.5,1)
-    (0.10865963555137714, 4.0, 4.108659635551377)
-    >>> calc_ET(0.2, 1, sw=0.3)
-    (0.017385541688220346, 0, 0.017385541688220346)
+        plant = plant or crop object
+        climate = climate object
     
     """
-    LAI = calc_LAI(kc)
-    T_max = calc_T_max(kc, ET_max)
-    E_max = calc_E_max(LAI)
-    T = calc_T(s, T_max, sw, s_star)
-    E = calc_E(s, E_max)
+    T = plant.calc_T(s)
+    E = climate.calc_E(s)
     return E, T, E+T
 
-def calc_kc(fraction_of_season=None):
-    """ Add comments """
-    # TODO: Fix this so kc varies throughout season.
-    return 1.0
+# def calc_kc(fraction_of_season=None):
+#     """ Add comments """
+#     # TODO: Fix this so kc varies throughout season.
+#     return 1.0
 
 # def calc_kc(x, mean=60, stand=20, pi=3.14159):
 #     """ Meant to calculate kc based on DOY but not
@@ -228,24 +179,117 @@ def calc_kc(fraction_of_season=None):
 #
 ######################################
 
+
+#%% Define climate
+climate = Climate(
+    alpha=10,       # average storm depth [mm]
+    lambda_r=0.3,   # storm frequency [day^-1]
+    t_seas=120,     # length of season [days]
+    ET_max=6.5      # maximum daily ET [mm]
+    )
+
+
+
+#%% Define the CropModel Class
+class CropModel():
+    """ Defines an ecohydrological model class for use with crops.
+
+
+    """
+    def __init__(self, *args, **kwargs):
+        from numpy import zeros
+        self.soil = kwargs.pop('soil')
+        self.crop = kwargs.pop('crop')
+        self.climate = kwargs.pop('climate')
+        self.n_days = len(climate.rainfall)
+
+        # Set maximum soil water content (mm):
+        self.nZr = self.soil.n * self.crop.Zr # [mm]  
+
+        # Pre-allocate arrays
+        self.R = climate.rainfall
+        self.s = zeros(self.n_days)
+        self.ET = zeros(self.n_days)
+        self.E = zeros(self.n_days)
+        self.T = zeros(self.n_days)
+        self.L = zeros(self.n_days)
+        self.dsdt = zeros(self.n_days)
+        
+        self.LAI = zeros(self.n_days)
+        self.ET_max = zeros(self.n_days)
+        self.T_max = zeros(self.n_days)
+        self.kc = zeros(self.n_days)
+
+        # Set initial conditions:
+        self.s[0] = 0.3     # relative soil moisture, [0-1]
+        
+    def run(self):
+        for t in range(self.n_days):
+            try:
+                # 0. Update the crop coefficient
+                # TODO: Edit Crop class to make this dynamic.
+                self.kc[t] = self.crop.calc_kc(t)
+                self.LAI[t] = self.crop.calc_LAI(t)
+
+                # 1. Calculate ET terms
+                self.T[t] = self.crop.calc_T(self.s[t],t)   # mm/day
+                self.E[t] = self.climate.calc_E(
+                    self.s[t],
+                    t,
+                    plant=self.crop,
+                    soil=self.soil) # mm/day
+                self.ET[t] = self.T[t] + self.E[t]
+                
+                # 2. Update Soil Moisture Water Balance
+                self.dsdt[t] = self.R[t] - self.ET[t]           # mm/day
+                self.s[t+1] = self.s[t] + self.dsdt[t]/self.nZr # [0-1]
+                
+                # 3. Force Soil Moisture Water Balance to Limits
+                if self.s[t+1] > 1:
+                    self.dsdt[t] = self.dsdt[t] - (self.s[t+1] - 1)
+                    self.L[t]  = (self.s[t+1] - 1)*self.nZr # [mm/day]
+                    self.s[t+1] = 1
+                if self.s[t+1] < 0:
+                    self.s[t+1] = 0
+                
+                # 4. Determine leakage loss:
+                if self.s[t+1] > self.soil.sfc:
+                    # Update dsdt for leakage loss
+                    self.dsdt[t]  = self.dsdt[t] - (self.s[t+1] - self.soil.sfc)
+                    # Calculate leakage in units of mm/day
+                    self.L[t] = (self.s[t+1] - self.soil.sfc)*self.nZr # [mm/day]
+                    self.s[t+1] = self.soil.sfc
+            except:
+                break
     
+    def output(self):
+        from pandas import DataFrame
+        return DataFrame({ 
+            'kc':self.kc,
+            'LAI':self.LAI,
+            'R':self.R,
+            's':self.s,
+            'E':self.E,
+            'T':self.T,
+            'L':self.L,
+            'dsdt':self.dsdt,
+
+        })
 
 
-def runmodel(n=0.4, Zr=500, ET_max=6.5):
+
+                   
+
+#%% OLD MODEL CODE
+
+def runmodel(n=0.4, Zr=500, ET_max=6.5, R):
     # INITIALIZE PARAMETERS FOR MODEL
     n = 0.4  # Porosity, [m3/m3]
     Zr = 500 # Rooting depth [mm]
     S_max = n*Zr    # Max soil water storage [mm]
     S_fc = 0.75 * S_max # Field capacity of soil water [mm]
     ET_max = 6.5 # Daily reference evapotranspiration [mm]
-
-    alpha = 10      # average storm depth [mm]
-    lambda_r = 0.3  # daily probability of rainfall [day^-1]
-    t_seas = 120    # length of season [days]
-
-    # STEP 1. SIMULATE DAILY RAINFALL
-    R = calc_R(alpha, lambda_r, t_seas) # Implicit that this is one season
-
+    
     # STEP 2. INITIALIZE WATER BALANCE TERMS
     S = np.zeros(len(R)) # Pre-allocate the array for soil moisture
     ET = np.zeros(len(R)) # Pre-allocate the array for evapotranspiration
@@ -255,10 +299,14 @@ def runmodel(n=0.4, Zr=500, ET_max=6.5):
     dSdt = np.zeros(len(R))# Pre-allocate the array for dSdt
 
     for t in range(len(R)-1): # Range starts with zero so ignore the last day.
-        # Calculate ET
-        kc = calc_kc(fraction_of_season=t/t_seas) # Returns a constant for now. 
-        ET[t] = calc_ET(S[t], kc, ET_max=ET_max) # Daily ET [mm/d]
+        
+        # Update the crop coefficient
+        crop.calc_kc(t)
 
+        # Calculate ET
+        T[t] = crop.calc_T(s)
+        E[t] = climate.calc_E(s,) 
+        
         # Update Soil Moisture Water Balance
         dSdt[t] = R[t] - ET[t] # We will handle leakage  (L[t]) later.
         S[t+1] = S[t] + dSdt[t]

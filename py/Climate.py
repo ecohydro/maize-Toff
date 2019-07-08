@@ -31,6 +31,21 @@ class Climate():
             self.key = value
 
 
+    def calc_E(self,s, q=4, soil=None, plant=None):
+        """ Determines the daily evaporation as a function of relative soil moisture
+
+        Usage: calc_E(s)
+
+            s = relative soil moisture [0-1]
+
+            E = E_max * [(s-sh)/(1-sh)]^q
+        
+        """
+        from math import exp
+        k = -0.35
+        E_max = self.ET_max*exp(-k*plant.LAI/plant.LAI_max)
+        return pow((s-soil.sh)/(1-soil.sh),q)*E_max
+
     @staticmethod # Static methods can be called without instancing the class.
     def generate(alpha_r, lambda_r, t_seas):
         """ Makes a time series of rainfall based on parameters
