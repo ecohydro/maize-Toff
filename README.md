@@ -114,7 +114,7 @@ Combining the prior three steps, we can create a model instance and run the mode
 ```python
 
 climate = Climate() # uses default climate values
-soil = soil('sand')
+soil = Soil('sand')
 crop = Crop(kc_max=1.2, LAI_max=2.0, T_max=4.0, soil=soil)
 
 model = Model(crop=crop,soil=soil,climate=climate)
