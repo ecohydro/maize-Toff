@@ -129,7 +129,6 @@ model = Model(crop=crop,soil=soil,climate=climate)
 model.run() # TADA!
 
 ```
-
 ### Getting model output 
 
 The `model.output()` function returns all the simulation output structured as a single pandas DataFrame. The frame has the following columns:
