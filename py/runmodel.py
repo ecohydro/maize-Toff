@@ -4,6 +4,7 @@
 # the ecohydrology model.
 from py.climate import Climate
 from py.soil import Soil
+from py.plant import Crop
 from py.model import CropModel
 
 #%% Setup a Parameter Dictionary
@@ -45,11 +46,15 @@ crop = Crop(
     s_star_MPa=params['crop']['s_star_MPa'],
     kc_max=params['crop']['kc_max'],
     LAI_max=params['crop']['LAI_max'],
-    T_max=params['crop']['T_max']
+    T_max=params['crop']['T_max'],
+    soil=soil
 )
 
 #%% Initialize the Model
 model = CropModel(crop=crop,climate=climate,soil=soil)
+
+#%% Run the Model
+model.run()
 
 #%% Assign Model Output
 output = model.output()

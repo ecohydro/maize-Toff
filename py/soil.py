@@ -146,8 +146,8 @@ class Soil():
         (see class description)
         
         """
-        self._valid_params = set(['b', 'Psi_S', 'Psi_l', 'n', 'Ks', 'S'])
-        self._required_params = set(['b', 'Psi_S', 'n', 'Ks'])
+        self._valid_params = set(['b', 'Psi_S_cm', 'Psi_l', 'n', 'Ks', 'S'])
+        self._required_params = set(['b', 'Psi_S_cm', 'n', 'Ks'])
         if texture: # If this class is instanced with a specific USDA soil texture.
             texture = texture.lower() # Force the soil texture category to lower case
             # Assign texture parameters based on the appropriate soil class:
@@ -166,7 +166,11 @@ class Soil():
             raise AttributeError("Must pass either a soil texture or dict of parameters")
         
         # Set Psi_S (MPa) from Psi_S_cm (cm). Assumes that Psi_S_cm is positive (as it should be!)
-        self.Psi_S_MPa = -self.Psi_S_cm * rho * g / 10E6
+        self.Psi_S_MPa = -1 * self.Psi_S_cm * rho * g / 10E6
+        self.sfc = self.s(self.theta(self.Psi_S_MPa))   # Field capacity in relative soil moisture [0-1]
+
+        # Hygroscopic point is when soil is so dry no further evaporation will occur.
+        self.sh = self.s(self.theta(-12))               # Hygroscopic point in relative soil moisture [0-1]
 
     def psi(self,theta):
         """ Return water potential in Pa based 
@@ -219,3 +223,4 @@ class Soil():
                 theta=theta,
                 n=self.n
             ))
+
