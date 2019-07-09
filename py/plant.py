@@ -1,6 +1,3 @@
-#%% Defines a Plant class
-from py.soil import Soil
-
 #%%
 class Plant():
     """ Defines a plant class
