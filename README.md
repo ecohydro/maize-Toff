@@ -113,12 +113,19 @@ Combining the prior three steps, we can create a model instance and run the mode
 
 ```python
 
+# Import the necessary objects:
+from py.climate import Climate
+from py.soil import Soil
+from py.plant import Crop
+from py.model import CropModel
+
+# Make the things
 climate = Climate() # uses default climate values
 soil = Soil('sand')
 crop = Crop(kc_max=1.2, LAI_max=2.0, T_max=4.0, soil=soil)
-
 model = Model(crop=crop,soil=soil,climate=climate)
 
+# RUN IT.
 model.run() # TADA!
 
 ```
