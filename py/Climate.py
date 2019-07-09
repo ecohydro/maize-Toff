@@ -3,7 +3,7 @@
 class Climate():
     """ Creates a daily rainfall timeseries for use in ecohydrological modeling
 
-    Usage: climate = Climate(alpha_r,lambda_r,t_seas)
+    Usage: climate = Climate(alpha_r,lambda_r,t_seas,ET_max)
 
         alpha_r = average storm depth [mm]
         lambda_r = storm frequency [day^-1]
@@ -31,7 +31,7 @@ class Climate():
             self.key = value
 
 
-    def calc_E(self,s, q=4, soil=None, plant=None):
+    def calc_E(self,s, t, q=4, soil=None, plant=None):
         """ Determines the daily evaporation as a function of relative soil moisture
 
         Usage: calc_E(s)
@@ -42,8 +42,8 @@ class Climate():
         
         """
         from math import exp
-        k = -0.35
-        E_max = self.ET_max*exp(-k*plant.LAI/plant.LAI_max)
+        k = -0.5
+        E_max = self.ET_max*exp(-k*plant.calc_LAI(t)/plant.LAI_max)
         return pow((s-soil.sh)/(1-soil.sh),q)*E_max
 
     @staticmethod # Static methods can be called without instancing the class.
