@@ -41,18 +41,17 @@ You can also specify your own parameters:
 
 param_dict = {
     'b': 11.4,
-    'Psi_S': 40.5,  # saturated water tension, cm
-    'Psi_l': 24.3,  # leakage water tension, cm
-    'n': 0.482,     # porosity, cm^3/cm^3 (is Psi_S) in C&H,
+    'Psi_S_cm': 40.5,   # saturated water tension, cm
+    'Psi_l_cm': 24.3,   # leakage water tension, cm
+    'n': 0.482,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
     'Ks': 0.0077,   # saturated hydraulic conductivity, cm/min
-    'S': 0.268       # sorptivity, cm/min^1/2  
+    'S': 0.268      # sorptivity, cm/min^1/2  
 }
 
 custom_soil = Soil(params=param_dict)
 ```
 
-Of the parameters, only `b`, `Psi_S`, `n`, and `Ks` are required. The model doesn't use `Psi_l` or `S` right now,
-although an implementation that uses `Psi_l` is not far off.
+Of the parameters, only `b`, `Psi_S_cm`, `Psi_l_cm`, `n`, and `Ks` are required. The model doesn't use `S` right now.
 
 ### Generate a climate object
 
