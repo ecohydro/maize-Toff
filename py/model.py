@@ -141,7 +141,7 @@ class CropModel():
                 #     f"Q[t]:{self.Q[t]:.3f}\t L[t]:{self.L[t]:.3f}"
                 # )
             except IndexError:
-                print("DONE. At end of simulation, timestep {t}".format(t=t))
+                print(f"DONE. At end of simulation, timestep {t}")
                 break
     
     def output(self):
