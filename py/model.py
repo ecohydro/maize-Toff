@@ -13,6 +13,9 @@ Contact:        nkrell@ucsb.edu
 
 """
 #%% Define the CropModel Class
+from pandas import DataFrame
+from numpy import zeros
+        
 class CropModel():
     """ Defines an ecohydrological model class for use with crops.
 
@@ -26,7 +29,6 @@ class CropModel():
 
     """
     def __init__(self, *args, **kwargs):
-        from numpy import zeros
         self.soil = kwargs.pop('soil')
         self.crop = kwargs.pop('crop')
         self.climate = kwargs.pop('climate')
@@ -143,7 +145,6 @@ class CropModel():
                 break
     
     def output(self):
-        from pandas import DataFrame
         return DataFrame({ 
             'kc':self.kc,
             'LAI':self.LAI,
