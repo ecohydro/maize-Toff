@@ -139,6 +139,7 @@ The `model.output()` function returns all the simulation output structured as a 
 * `E` Time series of daily soil evaporation [mm]
 * `T` Time series of daily plant transpiration [mm]
 * `L` Time series of soil leakage loss [mm]
+* `Q` Time series of surface runoff [mm]
 * `dsdt` Time series of changing relative soil moisture
 
 To plot any of this data, simply use the `.plot()` command:
