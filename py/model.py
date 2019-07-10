@@ -88,11 +88,11 @@ class CropModel():
                 """ Note:
 
                 The model does water balance in two parts. 
-                The first part determines the affect of any Rainfall 
+                The first part determines the effect of any Rainfall 
                 and Evapotranspiration on the relative soil moisture.
                 The input of rainfall could easily cause the soil moisture
                 to get above either the field capacity (soil.sfc) or saturation
-                (i.e. s > 1). In either case, two additional fxlues would kick in.
+                (i.e. s > 1). In either case, two additional fluxes would kick in.
 
                 Therefore, we first see how Rainfall and ET affect s, and update a
                 temporary s value, _s, with the temporary dsdt value, _dsdt.
