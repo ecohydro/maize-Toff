@@ -32,16 +32,24 @@ class CropModel():
         self.climate = kwargs.pop('climate')
         self.n_days = len(self.climate.rainfall)
 
-        # Set maximum soil water content (mm):
-        self.nZr = self.soil.n * self.crop.Zr # [mm]  
+        try:
+            # Set the nZr using the soil's function.
+            self.nZr = soil.set_nZr(crop)
+        except:
+            # Set maximum soil water content (mm):
+            self.nZr = self.soil.n * self.crop.Zr # [mm]  
 
         # Pre-allocate arrays
-        self.R = self.climate.rainfall
+        self.R = self.climate.rainfall  # [mm/day]
         self.s = zeros(self.n_days)     # [0-1]
-        self.ET = zeros(self.n_days)
-        self.E = zeros(self.n_days)
-        self.T = zeros(self.n_days)
-        self.L = zeros(self.n_days)
+        self.ET = zeros(self.n_days)    # [mm/day]
+        self.E = zeros(self.n_days)     # [mm/day]
+        self.T = zeros(self.n_days)     # [mm/day]
+        self.L = zeros(self.n_days)     # [mm/day]
+        self.Q = zeros(self.n_days)     # [mm/day]
+
+        # Note: We calculate dsdt in mm/day to make it easier 
+        # to handle water balance wrt to other terms.
         self.dsdt = zeros(self.n_days)  # [mm/day]
         
         self.LAI = zeros(self.n_days)
@@ -51,6 +59,10 @@ class CropModel():
 
         # Set initial conditions:
         self.s[0] = 0.3     # relative soil moisture, [0-1]
+        _s = self.s[0]      # intermediate soil moisture used during
+                            # model time step calculations.
+        _dsdt = 0           # intermediate soil moisture change used
+                            #  during model time step calculations.
         
     def run(self):
         for t in range(self.n_days):
@@ -69,26 +81,63 @@ class CropModel():
                     soil=self.soil) # mm/day
                 self.ET[t] = self.T[t] + self.E[t]
                 
-                # 2. Update Soil Moisture Water Balance
-                self.dsdt[t] = self.R[t] - self.ET[t]           # mm/day
-                self.s[t+1] = self.s[t] + self.dsdt[t]/self.nZr # [0-1]
+                # 2. Update Soil Moisture Water Balance (Part 1)
+
+                """ Note:
+
+                The model does water balance in two parts. 
+                The first part determines the affect of any Rainfall 
+                and Evapotranspiration on the relative soil moisture.
+                The input of rainfall could easily cause the soil moisture
+                to get above either the field capacity (soil.sfc) or saturation
+                (i.e. s > 1). In either case, two additional fxlues would kick in.
+
+                Therefore, we first see how Rainfall and ET affect s, and update a
+                temporary s value, _s, with the temporary dsdt value, _dsdt.
+
+                _dsdt = R(t) - E(s,t)
+                _s = s(t) + _dsdt
+
+                Now we can use the value of _s to see if leakage or runoff
+                occur in this time step (Step 3 and Step 4). 
                 
-                # 3. Force Soil Moisture Water Balance to Limits
-                if self.s[t+1] > 1:
-                    self.L[t]  = (self.s[t+1] - 1)*self.nZr # [mm/day]
-                    self.dsdt[t] = self.dsdt[t] - self.L[t] # [mm/day]
-                    self.s[t+1] = 1
-                if self.s[t+1] < 0:
-                    self.s[t+1] = 0
+                Then, once we have values of L(t) and Q(t) based on _s,
+                we update the dsdt and s values using our master equations:
+
+                dsdt(t) = R(t) - E(s,t) - L(s,t) - Q(s,t)
+                s(t+1) = s(t) + dsdt
+
+                All this _s and _dsdt stuff is an abstraction that allows us to 
+                ensure that we handle water balance in a way that makes sense.
+
+                Deal with it.
+
+                """
+                # Create temporary s and dsdt value for 
+                # use within timestep calculations:
+                _dsdt = self.R[t] - self.ET[t]         # mm/day
+                _s = self.s[t] + _dsdt/self.nZr
+                
+                # 3. Determine saturation excess flow
+                # Note: Use the temporary (intermediate) s value 
+                # for this calculation rather than s[t]
+                self.Q[t] = self.soil.calc_Q(
+                    _s, units='mm/day')
                 
                 # 4. Determine leakage loss:
-                if self.s[t+1] > self.soil.sfc:
-                    # Calculate leakage in units of mm/day
-                    self.L[t] = self.L[t] + (self.s[t+1] - self.soil.sfc)*self.nZr # [mm/day]
-                    # Update dsdt for leakage loss
-                    self.dsdt[t] = self.dsdt[t] - (self.s[t+1] - self.soil.sfc)*self.nZr # [mm/day]
-                    self.s[t+1] = self.soil.sfc
-            except:
+                # Note: Use the temporary (intermediate) s value 
+                # for this calculation rather than s[t]
+                self.L[t] = self.soil.calc_L(
+                    _s, units='mm/day')
+
+                # 5. Update Soil Moisture Water Balance (Part 2)
+                self.dsdt[t] = self.R[t] - self.ET[t] - self.Q[t] - self.L[t]
+                self.s[t+1] = self.s[t] + self.dsdt[t]/self.nZr
+                print("Time: {t}\t s(t):{s}\t dsdt:{dsdt}\t s(t+1):{s1}".format(
+                    t=t,s=s[t],dsdt=self.dsdt[t]/self.nZr,s1=s[t+1]
+                ))
+            except IndexError:
+                print("DONE. At end of simulation, timestep {t}".format(t=t))
                 break
     
     def output(self):

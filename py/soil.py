@@ -11,7 +11,7 @@ soils = {
     'sand':{
         'b': 4.05,
         'Psi_S_cm': 12.1,   # saturated water tension, cm
-        'Psi_l': 4.66,      # leakage water tension, cm
+        'Psi_l_cm': 4.66,      # leakage water tension, cm
         'n': 0.395,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 1.056,        # saturated hydraulic conductivity, cm/min
         'S': 1.52           # sorptivity, cm/min^1/2    
@@ -19,7 +19,7 @@ soils = {
     'loamy sand':{
         'b': 4.38,
         'Psi_S_cm': 9.0,    # saturated water tension, cm
-        'Psi_l': 2.38,      # leakage water tension, cm
+        'Psi_l_cm': 2.38,      # leakage water tension, cm
         'n': 0.410,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.938,        # saturated hydraulic conductivity, cm/min
         'S': 1.04           # sorptivity, cm/min^1/2  
@@ -27,7 +27,7 @@ soils = {
     'sandy loam':{
         'b': 4.90,
         'Psi_S_cm': 21.8,   # saturated water tension, cm
-        'Psi_l': 9.52,      # leakage water tension, cm
+        'Psi_l_cm': 9.52,      # leakage water tension, cm
         'n': 0.435,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.208,        # saturated hydraulic conductivity, cm/min
         'S': 1.03           # sorptivity, cm/min^1/2  
@@ -35,7 +35,7 @@ soils = {
     'silt loam':{
         'b': 5.30,
         'Psi_S_cm': 78.6,   # saturated water tension, cm
-        'Psi_l': 75.3,      # leakage water tension, cm
+        'Psi_l_cm': 75.3,      # leakage water tension, cm
         'n': 0.485,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.0432,       # saturated hydraulic conductivity, cm/min
         'S': 1.26           # sorptivity, cm/min^1/2  
@@ -43,7 +43,7 @@ soils = {
     'loam':{
         'b': 5.39,
         'Psi_S_cm': 47.8,   # saturated water tension, cm
-        'Psi_l': 20.0,      # leakage water tension, cm
+        'Psi_l_cm': 20.0,      # leakage water tension, cm
         'n': 0.451,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.0417,       # saturated hydraulic conductivity, cm/min
         'S': 0.693          # sorptivity, cm/min^1/2  
@@ -51,7 +51,7 @@ soils = {
     'sandy clay loam':{
         'b': 7.12,
         'Psi_S_cm': 29.9,   # saturated water tension, cm
-        'Psi_l': 11.7,      # leakage water tension, cm
+        'Psi_l_cm': 11.7,      # leakage water tension, cm
         'n': 0.420,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.0378,       # saturated hydraulic conductivity, cm/min
         'S': 0.488          # sorptivity, cm/min^1/2  
@@ -59,7 +59,7 @@ soils = {
     'silty clay loam':{
         'b': 7.75,
         'Psi_S_cm': 35.6,   # saturated water tension, cm
-        'Psi_l': 19.7,      # leakage water tension, cm
+        'Psi_l_cm': 19.7,      # leakage water tension, cm
         'n': 0.477,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.0102,       # saturated hydraulic conductivity, cm/min
         'S': 0.310          # sorptivity, cm/min^1/2  
@@ -67,7 +67,7 @@ soils = {
     'clay loam':{
         'b': 8.52,
         'Psi_S_cm': 63.0,   # saturated water tension, cm
-        'Psi_l': 48.1,      # leakage water tension, cm
+        'Psi_l_cm': 48.1,      # leakage water tension, cm
         'n': 0.476,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.0147,       # saturated hydraulic conductivity, cm/min
         'S': 0.537          # sorptivity, cm/min^1/2  
@@ -75,7 +75,7 @@ soils = {
     'sandy clay':{
         'b': 10.4,
         'Psi_S_cm': 15.3,   # saturated water tension, cm
-        'Psi_l': 8.18,      # leakage water tension, cm
+        'Psi_l_cm': 8.18,      # leakage water tension, cm
         'n': 0.426,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.0130,       # saturated hydraulic conductivity, cm/min
         'S': 0.223          # sorptivity, cm/min^1/2  
@@ -83,7 +83,7 @@ soils = {
     'silty clay':{
         'b': 10.4,
         'Psi_S_cm': 49.0,   # saturated water tension, cm
-        'Psi_l': 23.0,      # leakage water tension, cm
+        'Psi_l_cm': 23.0,      # leakage water tension, cm
         'n': 0.492,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.0062,       # saturated hydraulic conductivity, cm/min
         'S': 0.242          # sorptivity, cm/min^1/2  
@@ -91,7 +91,7 @@ soils = {
     'clay':{
         'b': 11.4,
         'Psi_S_cm': 40.5,   # saturated water tension, cm
-        'Psi_l': 24.3,      # leakage water tension, cm
+        'Psi_l_cm': 24.3,      # leakage water tension, cm
         'n': 0.482,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.0077,       # saturated hydraulic conductivity, cm/min
         'S': 0.268          # sorptivity, cm/min^1/2  
@@ -166,13 +166,26 @@ class Soil():
             raise AttributeError("Must pass either a soil texture or dict of parameters")
         
         # Set Psi_S (MPa) from Psi_S_cm (cm). Assumes that Psi_S_cm is positive (as it should be!)
-        self.Psi_S_MPa = -1 * self.Psi_S_cm * rho * g / 10E6
-        self.sfc = self.s(self.theta(self.Psi_S_MPa))   # Field capacity in relative soil moisture [0-1]
+        self.Psi_S_MPa = -1 * self.Psi_S_cm * rho * g / 1E6
+        self.Psi_L_MPa = -1 * self.Psi_l_cm * rho * g / 1E6
+        self.sfc = self.s(self.theta(self.Psi_L_MPa))   # Field capacity in relative soil moisture [0-1]
 
         # Hygroscopic point is when soil is so dry no further evaporation will occur.
         self.sh = self.s(self.theta(-12))               # Hygroscopic point in relative soil moisture [0-1]
+        self.nZr = None
 
-    def psi(self,theta):
+    def _check_nZr(self):
+        error = "Error: Calculation depends on value of self.nZr before calling self.set_nZr"
+        if not self.nZr:
+            raise AttributeError(error)
+
+    def _check_theta(self, theta):
+        error = "theta, {theta}, must be be in the interval (0,{n}]".format(
+                theta=theta, n=self.n)
+        if theta > self.n or theta <= 0:
+            raise ValueError(error)
+
+    def psi(self, theta):
         """ Return water potential in Pa based 
         on volumetric soil water content in m^3/m^3
 
@@ -183,11 +196,7 @@ class Soil():
             theta = soil water content [m^3/m^3]
         
         """
-        if theta > self.n or theta <= 0:
-            raise ValueError("theta, {theta}, must be be in the interval (0,{n}]".format(
-                theta=theta,
-                n=self.n
-            ))            
+        self._check_theta(theta)          
         return round(self.Psi_S_MPa * pow(self.n/theta,self.b),PRECISION)
     
     def theta(self,psi):
@@ -216,11 +225,89 @@ class Soil():
         Note: theta must be in the interval 0-n (porosity)
         
         """
-        if 0 < theta <= self.n:
-            return round(theta/self.n, PRECISION)
+        self._check_theta(theta)
+        return round(theta/self.n, PRECISION)
+
+    def set_nZr(self,plant):
+        """ Sets the nZr for this soil in order to 
+        determine fluxes in mm/day rather than relative
+        soil moisture
+
+        Usage: set_nZr(plant)
+
+            plant = plant object with plant.Zr value set.
+        
+        Returns:
+
+            nZr = n * Zr
+
+            Also sets internal soil property nZr according to:
+
+                self.nZr = self.n * plant.Zr
+        """
+        self.nZr = self.n * plant.Zr 
+        return self.nZr
+    
+    def calc_Q(self,s,units='mm/day'):
+        """ Determines runoff as a function of relative soil moisture
+
+        Usage: 
+
+            calc_Q(s,units)
+
+            s = relative soil moisture [0-1]
+            units = units to return leakage in
+                options are 'mm/day' (default). 
+                Otherwise, returns in [0-1] relative soil 
+                moisture
+
+        Returns:
+
+            Q = runoff [mm/day] or [0-1]
+        
+        """
+
+        # Saturation excess runoff occurs when 
+        # relative soil moisture exceeds 1.
+        Q = 0
+        if s > 1:
+            Q = 1 - s
+        if units == 'mm/day':
+            self._check_nZr()           
+            return Q * self.nZr
         else:
-            raise ValueError("theta, {theta}, must be be in the interval (0,{n}]".format(
-                theta=theta,
-                n=self.n
-            ))
+            return Q
+
+    def calc_L(self,s,units='mm/day'):
+        """ Calculates leakage loss as a function of relative soil moisture
+
+
+        Usage: calc_L(s,units)
+
+            s = relative soil moisture [0-1]
+            units = units to return leakage in
+                options are 'mm/day' (default). 
+                Otherwise, returns in [0-1] relative soil 
+                moisture
+        Returns:
+
+            L(s) [mm/day] if units='mm/day'
+            else returns [0-1]
+        
+        Notes:
+            v1. All soils are assumed to drain to field capacity each day.
+
+        """
+        L = 0
+        if s > self.sfc:
+            L =  min(1, s)-self.sfc
+        if units == 'mm/day':
+            self._check_nZr()
+            return L * self.nZr
+        else:
+            return L
+
+
+
+        
 

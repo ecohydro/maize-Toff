@@ -97,7 +97,9 @@ class Crop(Plant):
 
         """
         if not s <= 1:
-            raise ValueError("s must be <= 1")
+            raise ValueError("Time stemp {t}: s ({s}) must be <= 1".format(
+                t=t,
+                s=s))
         if s>=self.s_star:
             return self.calc_T_max(t)
         elif s>=self.sw:
