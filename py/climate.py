@@ -1,5 +1,7 @@
 #%% Climate Class Definition
-
+from math import exp
+from numpy.random import exponential, uniform
+   
 class Climate():
     """ Creates a daily rainfall timeseries for use in ecohydrological modeling
 
@@ -41,7 +43,6 @@ class Climate():
             E = E_max * [(s-sh)/(1-sh)]^q
         
         """
-        from math import exp
         k = -0.5
         E_max = self.ET_max*exp(-k*plant.calc_LAI(t)/plant.LAI_max)
         return pow((s-soil.sh)/(1-soil.sh),q)*E_max
@@ -61,9 +62,6 @@ class Climate():
         or have length of tseas (discrete rainfall probabilities each day.
 
         """
-        # Import necessary functions from numpy
-        from numpy.random import exponential, uniform
-
         amounts = exponential(scale=alpha_r, size=t_seas)
         rain_days = (uniform(low=0, high=1, size=t_seas) <= lambda_r).astype(int)
         return amounts * rain_days
