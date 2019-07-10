@@ -72,7 +72,7 @@ class CropModel():
                 self.kc[t] = self.crop.calc_kc(t)
                 self.LAI[t] = self.crop.calc_LAI(t)
 
-                # 1. Calculate ET terms
+                # 2. Calculate ET terms
                 self.T[t] = self.crop.calc_T(self.s[t],t)   # mm/day
                 self.E[t] = self.climate.calc_E(
                     self.s[t],
@@ -81,7 +81,7 @@ class CropModel():
                     soil=self.soil) # mm/day
                 self.ET[t] = self.T[t] + self.E[t]
                 
-                # 2. Update Soil Moisture Water Balance (Part 1)
+                # 1. Update Soil Moisture Water Balance (Part 1)
 
                 """ Note:
 
@@ -133,9 +133,11 @@ class CropModel():
                 # 5. Update Soil Moisture Water Balance (Part 2)
                 self.dsdt[t] = self.R[t] - self.ET[t] - self.Q[t] - self.L[t]
                 self.s[t+1] = self.s[t] + self.dsdt[t]/self.nZr
-                print("Time: {t}\t s(t):{s}\t dsdt:{dsdt}\t s(t+1):{s1}".format(
-                    t=t,s=s[t],dsdt=self.dsdt[t]/self.nZr,s1=s[t+1]
-                ))
+                # print(
+                #     f"Time: {t}\t s(t):{self.s[t]:.3f}\t"
+                #     f"dsdt:{self.dsdt[t]:.3f}\t s(t+1):{self.s[t+1]:.3f}"
+                #     f"Q[t]:{self.Q[t]:.3f}\t L[t]:{self.L[t]:.3f}"
+                # )
             except IndexError:
                 print("DONE. At end of simulation, timestep {t}".format(t=t))
                 break

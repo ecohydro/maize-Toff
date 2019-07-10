@@ -271,7 +271,7 @@ class Soil():
         # relative soil moisture exceeds 1.
         Q = 0
         if s > 1:
-            Q = 1 - s
+            Q = s - 1
         if units == 'mm/day':
             self._check_nZr()           
             return Q * self.nZr

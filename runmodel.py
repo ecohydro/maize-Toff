@@ -50,6 +50,10 @@ crop = Crop(
     soil=soil
 )
 
+# Finally, now that the plant is defined, we need 
+# to set the soil.nZr property:
+soil.set_nZr(crop)
+
 #%% Initialize the Model
 model = CropModel(crop=crop,climate=climate,soil=soil)
 
