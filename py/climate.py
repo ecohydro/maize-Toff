@@ -16,7 +16,7 @@ class Climate():
 
     """
     def __init__(self,alpha_r=10.0, lambda_r=0.3, t_seas=180, ET_max=6.5, **kwargs):
-        # Check to ensure that lambda_r is either a scalar or has lenght of t_seas
+        # Check to ensure that lambda_r is either a scalar or has length of t_seas
         if not isinstance(lambda_r, float):
             if len(lambda_r) != t_seas:
                 raise ValueError("lamda_r values should be a constant, or have length of t_seas")
