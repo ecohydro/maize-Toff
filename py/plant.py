@@ -9,7 +9,7 @@ class Plant():
         T_max=4,            # Maximum transpiration [mm/day]
         sw_MPa = -1.5,      # wilting point of plant in water potential [MPa]
         s_star_MPa = -0.2,  # water potential of maximum transpiration [MPa]
-        soil=None          # a soil in which this plant will grow
+        soil=None           # a soil in which this plant will grow
     ):
         self.Zr = Zr
         self.sw_MPa = sw_MPa
@@ -47,11 +47,11 @@ class Crop(Plant):
         super(Crop, self).__init__(*args, **kwargs)
 
     def calc_kc(self, day_of_season):
-        """ Calculates the current crop coefficient based on day of season
+        """ Note: Currently just returns kc_max regardless of day of season.
+        
+        TODO: Calculates the current crop coefficient based on day of season
 
         Usage: calc_kc(day_of_season)
-
-        Note: Currently just returns kc_max regardless of day of season.
 
         kc = kc_max
 
