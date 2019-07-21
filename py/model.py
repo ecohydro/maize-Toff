@@ -51,7 +51,7 @@ class CropModel():
         self.Q = zeros(self.n_days)     # [mm/day]
 
         # Note: We calculate dsdt in mm/day to make it easier 
-        # to handle water balance wrt to other terms.
+        # to handle water balance with regards to other terms.
         self.dsdt = zeros(self.n_days)  # [mm/day]
         
         self.LAI = zeros(self.n_days)
@@ -64,7 +64,7 @@ class CropModel():
         _s = self.s[0]      # intermediate soil moisture used during
                             # model time step calculations.
         _dsdt = 0           # intermediate soil moisture change used
-                            #  during model time step calculations.
+                            # during model time step calculations.
         
     def run(self):
         for t in range(self.n_days):
