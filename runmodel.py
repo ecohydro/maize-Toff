@@ -7,6 +7,9 @@ from py.soil import Soil
 from py.plant import Crop
 from py.model import CropModel
 
+# Import matplotlib to generate figures
+import matplotlib.pyplot as plt
+
 #%% Setup a Parameter Dictionary
 params = {
     'climate': {
@@ -63,3 +66,6 @@ model.run()
 #%% Assign Model Output
 output = model.output()
 
+#%% Generate figures
+output['ET'].plot()
+plt.show()

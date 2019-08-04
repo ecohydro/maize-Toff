@@ -7,9 +7,11 @@ Repo for modeling analysis of maize yield variability and tradeoffs between yiel
 
 ## Set-up
 1. ```cd maize-Toff```
-2. ```conda env create -f environment.yml -n maize```
+2. ```conda env create -f environment.yml -n maize-Toff```
 3. ```conda activate maize```
 4. ```jupyter notebook```
+
+Note: To update dependecies in an existing environment, use `conda env update --file environment.yml` after step four.
 
 ## Directory structure
 
@@ -132,7 +134,7 @@ model.run() # TADA!
 
 The `model.output()` function returns all the simulation output structured as a single pandas DataFrame. The frame has the following columns:
 
-* `kc` Time series of dailt crop coefficients. 
+* `kc` Time series of daily crop coefficients. 
 * `LAI` Time series of crop LAI
 * `R` Time series of daily rainfall [mm]
 * `s` Time series of daily relative soil moisture [0-1]
