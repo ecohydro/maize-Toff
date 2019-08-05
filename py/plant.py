@@ -46,14 +46,14 @@ class Crop(Plant):
         self.T_max = kwargs.pop('T_max')        # Maximum crop water use [mm/day]
         super(Crop, self).__init__(*args, **kwargs)
 
-    def calc_kc(self, t, t_seas = 120, f1 = 0.2, f2 = 0.5, f3 = 0.75, EoS = 1.0, kc_1 = 0.30, kc_2 = 1.2, kc_3 = 0.6):
+    def calc_kc(self, day_of_season, t_seas = 120, f1 = 0.2, f2 = 0.5, f3 = 0.75, EoS = 1.0, kc_1 = 0.30, kc_2 = 1.2, kc_3 = 0.6):
         """ Calculates crop coefficient that varies throughout the season 
         
         TODO: Run tests to make sure it does what I think it does.
 
         Usage: calc_kc(fraction_of_season=None, f1 = 0.2, f2 = 0.5, f3 = 0.75, EoS = 1.0, kc_1 = 0.30, kc_2 = 1.1, kc_3 = 0.6)
             Note: t must be a single-dimension array
-            t = user input # Start date [day]
+            day_of_season = user input # Start date [day]
             t_seas = 120 # Length of season [days]
             f1 = 0.2 # Fraction of Season from Initial to Vegetative
             f2 = 0.5 # Fraction of Season from Initial to Reproductive
@@ -65,16 +65,16 @@ class Crop(Plant):
             kc_max = # K3; i.e. Kc at End of Season
 
         """
-        if not t >= 0:
-            raise ValueError ("t must be >= 0")
-        if t <= t_seas*f1:
+        if not day_of_season >= 0:
+            raise ValueError ("day_of_season must be >= 0")
+        if day_of_season <= t_seas*f1:
             return kc_1
-        elif t_seas*f1 < t < t_seas*f2:
-            return ((t-f1*t_seas)/(f2*t_seas-F1*t_seas))*kc_2+kc_1
-        elif t_seas*f2 <= t <= t_seas*f3:
+        elif t_seas*f1 < day_of_season < t_seas*f2:
+            return ((day_of_season-f1*t_seas)/(f2*t_seas-f1*t_seas))*kc_2+kc_1
+        elif t_seas*f2 <= day_of_season <= t_seas*f3:
             return kc_2
-        elif t_seas*f3 <= t < t_seas*EoS:
-            return ((t-EoS*t_seas)/(f3*t_seas-EoS*t_seas))*kc_3
+        elif t_seas*f3 <= day_of_season < t_seas*EoS:
+            return ((day_of_season-EoS*t_seas)/(f3*t_seas-EoS*t_seas))*kc_3
         else:
             return self.kc_max
 
