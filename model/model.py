@@ -28,10 +28,11 @@ class CropModel():
         )
 
     """
-    def __init__(self, *args, **kwargs):
-        self.soil = kwargs.pop('soil')
-        self.crop = kwargs.pop('crop')
-        self.climate = kwargs.pop('climate')
+    def __init__(self, soil=None,climate=None,crop=None,*args):
+        
+        self.soil = soil
+        self.crop = crop
+        self.climate = climate
         self.n_days = len(self.climate.rainfall)
 
         try:
@@ -141,7 +142,8 @@ class CropModel():
                 #     f"Q[t]:{self.Q[t]:.3f}\t L[t]:{self.L[t]:.3f}"
                 # )
             except IndexError:
-                print(f"DONE. At end of simulation, timestep {t}")
+                #print(f"DONE. At end of simulation, timestep {t}")
+                print("done")
                 break
     
     def output(self):
