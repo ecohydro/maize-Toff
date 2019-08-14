@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 
 # This is an example script that runs
 # the ecohydrology model.
-from model.climate import Climate
-from model.soil import Soil
-from model.plant import Crop
-from model.model import CropModel
+from farm import Climate
+from farm import Soil
+from farm import Crop
+from farm import CropModel
 
 
 

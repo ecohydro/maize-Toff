@@ -65,4 +65,3 @@ class Climate():
         amounts = exponential(scale=alpha_r, size=t_seas)
         rain_days = (uniform(low=0, high=1, size=t_seas) <= lambda_r).astype(int)
         return amounts * rain_days
-
