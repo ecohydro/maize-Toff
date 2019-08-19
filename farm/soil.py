@@ -1,4 +1,11 @@
+"""
+This is the "example" module.
 
+The example module supplies one function, factorial().  For example,
+
+>>> Soil('Sand')
+<__main__.Soil object at 0x7fe13f96f0b8>
+"""
 
 #%% Set parameters related to soils and siginificant digits
 rho = 1000      # density of water in kg/m^3
@@ -308,6 +315,7 @@ class Soil():
             return L
 
 
-
-        
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()  
 
