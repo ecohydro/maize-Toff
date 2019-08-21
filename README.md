@@ -15,7 +15,7 @@ Note: To update dependecies in an existing environment, use `conda env update --
 
 ## Directory structure
 
-### py/
+### farm/
 * where models are stored
 
 ### data/
