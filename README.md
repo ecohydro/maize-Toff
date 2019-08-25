@@ -55,17 +55,17 @@ custom_soil = Soil(params=param_dict)
 
 Of the parameters, only `b`, `Psi_S_cm`, `Psi_l_cm`, `n`, and `Ks` are required. The model doesn't use `S` right now.
 
-### Generate a climate object
+### Generate a Climate object
 
 The climate object has information on maximum evapotranspiration, as well as a time series of rainfall.
 The rainfall timeseries is generated stochastically using
 the parameters of storm depth, frequency, and the length of the season. The storm depth (`alpha_r`) specifies the average daily storm depth, assuming that daily storm depths are drawn from an exponential distribution. The frequency (`lambda_r`) is best described as the daily probability of rainfall. The length of the season ends up setting the timescale of the simulation in days.
 
 There are several keyword arguments available:
-* **alpha_r** Average storm depth [mm]
-* **lambda_r** Frequency of storms [day^-1]
-* **t_seas** Length of rainy season [days]
-* **ET_max** Maximum evapotranspiration [mm/day]  
+* `alpha_r` Average storm depth [`mm`]
+* `lambda_r` Frequency of storms [`day^-1`]
+* `t_seas` Length of rainy season [`days`]
+* `ET_max` Maximum evapotranspiration [`mm/day`]  
 
 Keyword arguments can be specified when instantiating the object, or the following are the resonable defaults values:
 ```python
@@ -78,7 +78,7 @@ climate = Climate(
 
 ```
 
-### Generate a plant
+### Generate a Plant
 
 The plant object requires the most parameters to generate, and some of these parameters depend on the soil in which the plant is growing. In addition, the plant object can be subclassed into specific plant types to allow for varying structures and function. In this simulation, we are using the `Crop` subclass, which is initialized with the minimum following parameters:
 
