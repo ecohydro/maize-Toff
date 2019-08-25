@@ -61,24 +61,20 @@ The climate object has information on maximum evapotranspiration, as well as a t
 The rainfall timeseries is generated stochastically using
 the parameters of storm depth, frequency, and the length of the season. The storm depth (`alpha_r`) specifies the average daily storm depth, assuming that daily storm depths are drawn from an exponential distribution. The frequency (`lambda_r`) is best described as the daily probability of rainfall. The length of the season ends up setting the timescale of the simulation in days.
 
+There are several keyword arguments available:
+* **alpha_r** Average storm depth [mm]
+* **lambda_r** Frequency of storms [day^-1]
+* **t_seas** Length of rainy season [days]
+* **ET_max** Maximum evapotranspiration [mm/day]  
+
+Keyword arguments can be specified when instantiating the object, or the following are the resonable defaults values:
 ```python
-# Average storm depth [mm]
-alpha_r=10.0    
-
-# Frequency of storms [day^-1]
-lambda_r=0.3   
-
- # Length of rainy season [days]
-t_seas=180     
-
-# Maximum evapotranspiration [mm/day]
-ET_max=6.5      
 
 climate = Climate(
-    alpha_r=alpha_r,
-    lambda_r=lambda_r,
-    t_seas=t_seas,
-    ET_max=ET_max)
+    alpha_r=10.0,
+    lambda_r=0.3,
+    t_seas=180,
+    ET_max=6.5)
 
 ```
 
@@ -87,11 +83,8 @@ climate = Climate(
 The plant object requires the most parameters to generate, and some of these parameters depend on the soil in which the plant is growing. In addition, the plant object can be subclassed into specific plant types to allow for varying structures and function. In this simulation, we are using the `Crop` subclass, which is initialized with the minimum following parameters:
 
 * `kc_max` The maximum crop coefficient [`dimensionless`], which is a scale factor applied to `ET_max` to determine the maximum rate of plant transpiration, `T_max`.
-
 * `LAI_max` The maximum crop leaf area [`m^2/m^2`].
-
 * `T_max` The maximum rate of crop water use in [`mm/day`]
-
 * `soil` A soil object that specifies the soil that this crop is growing in.
 
 ```python
