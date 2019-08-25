@@ -11,11 +11,17 @@ class Climate():
         lambda_r = storm frequency [day^-1]
         t_seas = length of growing season [days]
 
+    Default values:
+        alpha_r = 10
+        lambda_r = 0.25
+        t_seas = 180
+        ET_max = 6.5
+
     Note: lambda must either be a single value (constant rainfall probability all season),
     or have length of tseas (discrete rainfall probabilities each day.
 
     """
-    def __init__(self, alpha_r=10.0, lambda_r=0.3, t_seas=180, ET_max=6.5, **kwargs):
+    def __init__(self, alpha_r=10.0, lambda_r=0.25, t_seas=180, ET_max=6.5, **kwargs):
         # Check to ensure that lambda_r is either a scalar or has length of t_seas
         if not isinstance(lambda_r, float):
             if len(lambda_r) != t_seas:

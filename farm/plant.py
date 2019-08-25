@@ -31,19 +31,21 @@ class Plant():
 class Crop(Plant):
     """ Creates a Crop class.
 
-    Usage: crop = Crop(
-        kc_max=1,
-        LAI_max=3.0,
-        day_of_season=1,
-        climate=climate,
-        soil=soil
-    )
+    Usage: crop = Crop(soil=soil)
+
+    optional keyword arguments and their default values:
+        'Zr': 500,          # Planting depth [mm]
+        'sw_MPa':-1.5,      # Plant wilting point [MPa]
+        's_star_MPa':-0.2,  # Water potential for max T
+        'kc_max':1.2,       # Maximum crop coefficient
+        'LAI_max':3.0,      # Max Leaf Area Index [m2/m2]
+        'T_max':4.0         # Max Crop Water Use [mm/day]
 
     """
-    def __init__(self,*args,**kwargs):
-        self.kc_max = kwargs.pop('kc_max' )     # Maximum crop coefficient [0-1]
-        self.LAI_max = kwargs.pop('LAI_max')    # Maximum crop leaf area index [m^2/m^2]
-        self.T_max = kwargs.pop('T_max')        # Maximum crop water use [mm/day]
+    def __init__(self, Zr=500, sw_MPa=-1.5, s_star_MPa=-0.2, kc_max=1.2, LAI_max=3.0, T_max=4.0,*args,**kwargs):
+        self.kc_max = kc_max     # Maximum crop coefficient [0-1]
+        self.LAI_max = LAI_max    # Maximum crop leaf area index [m^2/m^2]
+        self.T_max = T_max        # Maximum crop water use [mm/day]
         super(Crop, self).__init__(*args, **kwargs)
 
     def calc_kc(self, day_of_season, t_seas = 120, f1 = 0.2, f2 = 0.5, f3 = 0.75, EoS = 1.0, kc_ini = 0.30, kc_max = 1.2, kc_EoS = 0.6):
