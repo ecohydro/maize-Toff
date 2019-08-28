@@ -115,10 +115,10 @@ Combining the prior three steps, we can create a model instance and run the mode
 ```python
 
 # Import the necessary objects:
-from py.climate import Climate
-from py.soil import Soil
-from py.plant import Crop
-from py.model import CropModel
+from farm.climate import Climate
+from farm.soil import Soil
+from farm.plant import Crop
+from farm.model import CropModel
 
 # Make the things
 climate = Climate() # uses default climate values
