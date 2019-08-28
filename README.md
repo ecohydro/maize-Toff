@@ -124,10 +124,12 @@ from farm.model import CropModel
 climate = Climate() # uses default climate values
 soil = Soil('sand')
 crop = Crop(kc_max=1.2, LAI_max=2.0, T_max=4.0, soil=soil)
-model = CropModel(crop=crop,soil=soil,climate=climate)
 
 # Set rooting depth
 soil.set_nZr(crop)
+
+# Create the model
+model = CropModel(crop=crop,soil=soil,climate=climate)
 
 # RUN IT.
 model.run() # TADA!
