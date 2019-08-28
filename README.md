@@ -129,6 +129,9 @@ model = CropModel(crop=crop,soil=soil,climate=climate)
 # RUN IT.
 model.run() # TADA!
 
+soil.set_nZr(crop)
+model.output()
+
 ```
 ### Getting model output 
 
