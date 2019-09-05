@@ -8,7 +8,7 @@ class Plant():
         Zr=500,             # Rooting depth [mm]
         T_max=4,            # Maximum transpiration [mm/day]
         sw_MPa = -1.5,      # wilting point of plant in water potential [MPa]
-        s_star_MPa = -0.2,  # water potential of maximum transpiration [MPa]
+        s_star_MPa = -0.03, # water potential of maximum transpiration [MPa], cf. Laio et al., 2001b, p.713
         soil=None           # a soil in which this plant will grow
     ):
         self.Zr = Zr

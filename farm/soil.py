@@ -18,7 +18,7 @@ soils = {
     'sand':{
         'b': 4.05,
         'Psi_S_cm': 12.1,   # saturated water tension, cm
-        'Psi_l_cm': 4.66,      # leakage water tension, cm
+        'Psi_l_cm': 4.66,   # leakage water tension, cm
         'n': 0.395,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 1.056,        # saturated hydraulic conductivity, cm/min
         'S': 1.52           # sorptivity, cm/min^1/2    
@@ -175,8 +175,14 @@ class Soil():
         # Set Psi_S (MPa) from Psi_S_cm (cm). Assumes that Psi_S_cm is positive (as it should be!)
         self.Psi_S_MPa = -1 * self.Psi_S_cm * rho * g / 1E6
         self.Psi_L_MPa = -1 * self.Psi_l_cm * rho * g / 1E6
-        self.sfc = self.s(self.theta(self.Psi_L_MPa))   # Field capacity in relative soil moisture [0-1]
 
+        # This is based on best ideas around C&H, but probably is making a bad assumption about what
+        # Psi_L_MPa truly represents. 
+        # self.sfc = self.s(self.theta(self.Psi_L_MPa))   # Field capacity in relative soil moisture [0-1]
+
+        # This version of sfc calculation comes from Laio et al. 2001b. Specifically, cf. the discussion
+        # on p.714, and equation 15. 
+        self.sfc = pow(0.05/60/24/self.Ks,1/(2*self.b+3))
         # Hygroscopic point is when soil is so dry no further evaporation will occur.
         self.sh = self.s(self.theta(-12))               # Hygroscopic point in relative soil moisture [0-1]
         self.nZr = None
@@ -253,7 +259,7 @@ class Soil():
                 self.nZr = self.n * plant.Zr
         """
         self.nZr = self.n * plant.Zr 
-        return self.nZr
+        return self.nZr #TODO: Do we need to return this value
     
     def calc_Q(self,s,units='mm/day'):
         """ Determines runoff as a function of relative soil moisture
