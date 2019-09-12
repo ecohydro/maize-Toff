@@ -125,9 +125,6 @@ climate = Climate() # uses default climate values
 soil = Soil('sand')
 crop = Crop(kc_max=1.2, LAI_max=2.0, T_max=4.0, soil=soil)
 
-# Set rooting depth
-soil.set_nZr(crop)
-
 # Create the model
 model = CropModel(crop=crop,soil=soil,climate=climate)
 
