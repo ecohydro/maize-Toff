@@ -8,7 +8,7 @@ The example module supplies one function, factorial().  For example,
 """
 
 #%% Set parameters related to soils and siginificant digits
-rho = 1000      # density of water in kg/m^3
+rho = 1000.0    # density of water in kg/m^3
 g = 9.8         # acceleration of gravity in m/s^2
 PRECISION = 2   # Number of decimal places of precision in calculations (default is 2)
 
@@ -25,7 +25,7 @@ soils = {
     },
     'loamy sand':{
         'b': 4.38,
-        'Psi_S_cm': 9.0,    # saturated water tension, cm 
+        'Psi_S_cm': 9.0,    # saturated water tension, cm
         'Psi_l_cm': 2.38,   # leakage water tension, cm
         'n': 0.410,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.938,        # saturated hydraulic conductivity, cm/min
@@ -57,7 +57,7 @@ soils = {
     },
     'sandy clay loam':{
         'b': 7.12,
-        'Psi_S_cm': 29.9,   # saturated water tension, value cm
+        'Psi_S_cm': 29.9,   # saturated water tension, cm
         'Psi_l_cm': 11.7,   # leakage water tension, cm
         'n': 0.420,         # porosity, cm^3/cm^3 (is Psi_S) in C&H,
         'Ks': 0.0378,       # saturated hydraulic conductivity, cm/min
@@ -107,6 +107,7 @@ soils = {
 
 #%% Soil CLass Definition
 
+# pylint: disable=maybe-no-member
 class Soil():
     """ Defines a soil object based on either passed parameters
     or a soil texture class corresponding to the textures defined in 
@@ -155,6 +156,10 @@ class Soil():
         """
         self._valid_params = set(['b', 'Psi_S_cm', 'Psi_l', 'n', 'Ks', 'S'])
         self._required_params = set(['b', 'Psi_S_cm', 'n', 'Ks'])
+        
+        # Set required attributes to None:
+        [setattr(self, attr, None) for attr in self._required_params]
+        
         if texture: # If this class is instanced with a specific USDA soil texture.
             texture = texture.lower() # Force the soil texture category to lower case
             # Assign texture parameters based on the appropriate soil class:
@@ -173,16 +178,18 @@ class Soil():
             raise AttributeError("Must pass either a soil texture or dict of parameters")
         
         # Set Psi_S (MPa) from Psi_S_cm (cm). Assumes that Psi_S_cm is positive (as it should be!)
-        self.Psi_S_MPa = -1 * self.Psi_S_cm * rho * g / 1E6
-        self.Psi_L_MPa = -1 * self.Psi_l_cm * rho * g / 1E6
-
-        # This is based on best ideas around C&H, but probably is making a bad assumption about what
-        # Psi_L_MPa truly represents. 
-        # self.sfc = self.s(self.theta(self.Psi_L_MPa))   # Field capacity in relative soil moisture [0-1]
+        self.Psi_S_MPa = -1 * self.Psi_S_cm / 100 * rho * g / 1E6 
+        self.Psi_L_MPa = -1 * self.Psi_l_cm / 100 * rho * g / 1E6
 
         # This version of sfc calculation comes from Laio et al. 2001b. Specifically, cf. the discussion
         # on p.714, and equation 15. 
-        self.sfc = pow(0.05/60/24/self.Ks,1/(2*self.b+3))
+        self.sfc = pow(0.05/60/24/(self.Ks*10),1/(2*self.b+3))  # Convert Ks in mm/day 
+        # Make sure that field capacity is always lower than soil porosity.
+        if self.sfc > self.n:
+            raise ValueError("soil field capacity, {sfc} is larger than porosity, {n}".format(
+                sfc=self.sfc,
+                n=self.n
+            ))
         # Hygroscopic point is when soil is so dry no further evaporation will occur.
         self.sh = self.s(self.theta(-12))               # Hygroscopic point in relative soil moisture [0-1] # TODO: We also set this to -100 for testing
         self.nZr = None                                 # TODO: Hygroscopic point is a wonky parameter stuck in the middle code.. consider setting elsewhere
@@ -195,7 +202,7 @@ class Soil():
     def _check_theta(self, theta):
         error = "theta, {theta}, must be be in the interval (0,{n}]".format(
                 theta=theta, n=self.n)
-        if theta > self.n or theta <= 0:
+        if theta > self.n or theta < 0:
             raise ValueError(error)
 
     def psi(self, theta):
@@ -209,8 +216,9 @@ class Soil():
             theta = soil water content [m^3/m^3]
         
         """
-        self._check_theta(theta)          
-        return round(self.Psi_S_MPa * pow(self.n/theta,self.b),PRECISION)
+        self._check_theta(theta)
+        s = self.s(theta=theta)          
+        return round(self.Psi_S_MPa * pow(s,-self.b),PRECISION)
     
     def theta(self,psi):
         """ Return a volumetric water content in m^3/m^3 
@@ -228,19 +236,34 @@ class Soil():
         return min([round((self.n * pow(psi/self.Psi_S_MPa, 1/-self.b)),PRECISION), self.n]) 
 
 
-    def s(self,theta):
+    def s(self,theta=None,psi=None):
         """ Return a relative soil moisture value, s [0-1]
-        given a volumetric water content [m^3/m^3]
+        given a volumetric water content [m^3/m^3] or a 
+        water potential [MPa]
 
         Usage: s(theta):
 
             theta = volumetric water content [m^3/m^3]
+            psi = water potential [MPa]
 
         Note: theta must be in the interval 0-n (porosity)
+        Note: psi must be negative
+        Note: Function must be called with either theta or psi, but not both.
         
         """
+        if theta and psi:
+            raise ValueError(
+            "Both theta ({theta}) and psi {psi} values provided only one argument allowed".format(
+                theta=theta,
+                psi=psi
+            ))
+        if psi:
+            theta = self.theta(psi)
         self._check_theta(theta)
-        return round(theta/self.n, PRECISION)
+        try:
+            return round(theta/self.n, PRECISION)
+        except:
+            raise ValueError("Either theta or psi must be provided as an argument.")
 
     def set_nZr(self,plant):
         """ Sets the nZr for this soil in order to 
