@@ -39,12 +39,13 @@ class Climate():
             self.key = value
 
 
-    def calc_E(self, s, t, q=4, soil=None, plant=None):
+    def calc_E(self, s, t, q=4, soil=None, plant=None): 
         """ Determines the daily evaporation as a function of relative soil moisture
 
         Usage: calc_E(s)
 
             s = relative soil moisture [0-1]
+            t = day of season
 
             E = E_max * [(s-sh)/(1-sh)]^q
 

@@ -132,7 +132,7 @@ class Soil():
                 'Psi_l': 24.3,  # leakage water tension, cm
                 'n': 0.482,     # porosity, cm^3/cm^3 (is Psi_S) in C&H,
                 'Ks': 0.0077,   # saturated hydraulic conductivity, cm/min
-                'S': 0.268       # sorptivity, cm/min^1/2  
+                'S': 0.268      # sorptivity, cm/min^1/2  
             }
     
     Note: In C&H 1978, soil water retention relationships were defined according to _tensions_. 
@@ -190,8 +190,8 @@ class Soil():
                 n=self.n
             ))
         # Hygroscopic point is when soil is so dry no further evaporation will occur.
-        self.sh = self.s(psi=-12)  # Hygroscopic point in relative soil moisture [0-1]
-        self.nZr = None
+        self.sh = self.s(self.theta(-12))               # Hygroscopic point in relative soil moisture [0-1] # TODO: We also set this to -100 for testing
+        self.nZr = None                                 # TODO: Hygroscopic point is a wonky parameter stuck in the middle code.. consider setting elsewhere
 
     def _check_nZr(self):
         error = "Error: Calculation depends on value of self.nZr before calling self.set_nZr"
@@ -232,7 +232,8 @@ class Soil():
         if psi > 0:
             raise ValueError("psi, {psi}, must be less than or equal to zero.".format(psi=psi))
         # Ensure result is rounded to correct precision and that we do not exceed porosity
-        return min([round((self.n * pow(psi/self.Psi_S_MPa, 1/-self.b)),PRECISION), self.n])
+        return min([round((self.n * pow(psi/self.Psi_S_MPa, 1/-self.b)),PRECISION), self.n]) 
+
 
     def s(self,theta=None,psi=None):
         """ Return a relative soil moisture value, s [0-1]
@@ -281,7 +282,7 @@ class Soil():
                 self.nZr = self.n * plant.Zr
         """
         self.nZr = self.n * plant.Zr 
-        return self.nZr #TODO: Do we need to return this value
+        return self.nZr 
     
     def calc_Q(self,s,units='mm/day'):
         """ Determines runoff as a function of relative soil moisture
@@ -346,4 +347,3 @@ class Soil():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()  
-
