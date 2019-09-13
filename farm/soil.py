@@ -105,6 +105,57 @@ soils = {
     }
 }
 
+##% Notes on Soil-Water Relationships in Clapp & Hornberger
+"""
+Clapp & Hornberger, 1978 defined a suite of empirical relationships that 
+describe how the water potential of soil water varies with volumetric water
+content over a range of soil textures. They used 11 soil textures that 
+correspond to USDA soil texture classes, and provided key parameters that
+describe the soil-water relationships for each of the 11 classes of soil.
+
+There are two critical relationships for each soil:
+
+1. The relationship between soil water content and hydraulic conductivity.
+2. The relationship between soil water content and soil water potential.
+
+Soil water content is generally characterized by either volumetric water
+content, theta (m^3 water/m^ soil), or soil saturation (theta/porosity).
+The units of both measures are dimensionless, but soil saturation varies
+from [0-1], while volumetric water content varies from [0-porosity].
+
+The characterization of hydraulic conductivity is always given as a velocity,
+although specific units can be in cm/sec or m/day.
+
+The units of water potential can vary widely, but generally are either 
+expressed as an amount of energy per unit volume of soil or as a length.
+Because an energy per unit volume is dimensionally the same as a force per
+unit area, water potential is often given as a pressure (Pa, or MPa). 
+However, pressures were historically measured as heights using manometers,
+so pressure is also given as a unit of length (this is still done with 
+atmospheric pressure as well, e.g. mm of Hg). The relationship between
+the height (l, in meters) that a liquid rises in a tube and the pressure
+(P, in Pa) at the base of the column of liquid is given by:
+
+P = l * rho * g
+
+where rho is the density of the liquid (1000 kg/m^3 for water), and g 
+is the acceleration of gravity (9.8 m/s^2 for Earth). For unsaturated
+soils, the energy per unit volume is negative, meaning that the pressure
+is negative; a negative pressure is a tension. Often the tension that
+water is held at is very large, so we use MPa rather than Pa (MPa = Pa * 1E6).
+Finally, the symbol Psi is often used to represent soil water potential, 
+so we adopt that symbol in this model.
+
+Now, relationships between soil water content and water potential are 
+shaped as power laws, such that potential is proportional to water 
+content expressed as saturation raised to some constant times the
+water potential associated with saturation (Psi_S)
+
+Psi = Psi_S * s ^ -b    (eq. 1 from Clapp & Hornberger)
+
+
+
+"""
 #%% Soil CLass Definition
 
 class Soil():
@@ -177,8 +228,8 @@ class Soil():
             raise AttributeError("Must pass either a soil texture or dict of parameters")
         
         # Set Psi_S (MPa) from Psi_S_cm (cm). Assumes that Psi_S_cm is positive (as it should be!)
-        self.Psi_S_MPa = -1 * self.Psi_S_cm * rho * g / 1E6 
-        self.Psi_L_MPa = -1 * self.Psi_l_cm * rho * g / 1E6
+        self.Psi_S_MPa = -1 * self.Psi_S_cm / 100 / rho * g / 1E6 
+        self.Psi_L_MPa = -1 * self.Psi_l_cm / 100 rho * g / 1E6
 
         # This is based on best ideas around C&H, but probably is making a bad assumption about what
         # Psi_L_MPa truly represents. 
