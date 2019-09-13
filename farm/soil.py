@@ -187,7 +187,7 @@ class Soil():
 
         # This version of sfc calculation comes from Laio et al. 2001b. Specifically, cf. the discussion
         # on p.714, and equation 15. 
-        self.sfc = pow(0.05/60/24/self.Ks,1/(2*self.b+3))
+        self.sfc = pow(0.05/60/24/(self.Ks*10),1/(2*self.b+3))  # Convert Ks in mm/day 
         # Hygroscopic point is when soil is so dry no further evaporation will occur.
         self.sh = self.s(self.theta(-12))               # Hygroscopic point in relative soil moisture [0-1]
         self.nZr = None
@@ -200,7 +200,7 @@ class Soil():
     def _check_theta(self, theta):
         error = "theta, {theta}, must be be in the interval (0,{n}]".format(
                 theta=theta, n=self.n)
-        if theta > self.n or theta <= 0:
+        if theta > self.n or theta < 0:
             raise ValueError(error)
 
     def psi(self, theta):
