@@ -178,7 +178,7 @@ class Soil():
         
         # Set Psi_S (MPa) from Psi_S_cm (cm). Assumes that Psi_S_cm is positive (as it should be!)
         self.Psi_S_MPa = -1 * self.Psi_S_cm / 100 / rho * g / 1E6 
-        self.Psi_L_MPa = -1 * self.Psi_l_cm / 100 rho * g / 1E6
+        self.Psi_L_MPa = -1 * self.Psi_l_cm / 100 / rho * g / 1E6
 
         # This is based on best ideas around C&H, but probably is making a bad assumption about what
         # Psi_L_MPa truly represents. 
