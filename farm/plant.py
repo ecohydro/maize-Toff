@@ -42,7 +42,7 @@ class Crop(Plant):
         'T_max':4.0         # Max Crop Water Use [mm/day]
 
     """
-    def __init__(self, Zr=500, sw_MPa=-1.5, s_star_MPa=-0.2, kc_max=1.2, LAI_max=3.0, T_max=4.0,*args,**kwargs):
+    def __init__(self, kc_max=1.2, LAI_max=3.0, T_max=4, *args,**kwargs):
         self.kc_max = kc_max     # Maximum crop coefficient [0-1]
         self.LAI_max = LAI_max    # Maximum crop leaf area index [m^2/m^2]
         self.T_max = T_max        # Maximum crop water use [mm/day]
