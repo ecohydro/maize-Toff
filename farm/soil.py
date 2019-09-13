@@ -107,6 +107,7 @@ soils = {
 
 #%% Soil CLass Definition
 
+# pylint: disable=maybe-no-member
 class Soil():
     """ Defines a soil object based on either passed parameters
     or a soil texture class corresponding to the textures defined in 
@@ -158,7 +159,7 @@ class Soil():
         
         # Set required attributes to None:
         [setattr(self, attr, None) for attr in self._required_params]
-
+        
         if texture: # If this class is instanced with a specific USDA soil texture.
             texture = texture.lower() # Force the soil texture category to lower case
             # Assign texture parameters based on the appropriate soil class:
