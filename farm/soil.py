@@ -181,10 +181,6 @@ class Soil():
         self.Psi_S_MPa = -1 * self.Psi_S_cm / 100 / rho * g / 1E6 
         self.Psi_L_MPa = -1 * self.Psi_l_cm / 100 / rho * g / 1E6
 
-        # This is based on best ideas around C&H, but probably is making a bad assumption about what
-        # Psi_L_MPa truly represents. 
-        # self.sfc = self.s(self.theta(self.Psi_L_MPa))   # Field capacity in relative soil moisture [0-1]
-
         # This version of sfc calculation comes from Laio et al. 2001b. Specifically, cf. the discussion
         # on p.714, and equation 15. 
         self.sfc = pow(0.05/60/24/(self.Ks*10),1/(2*self.b+3))  # Convert Ks in mm/day 
