@@ -178,14 +178,20 @@ class Soil():
             raise AttributeError("Must pass either a soil texture or dict of parameters")
         
         # Set Psi_S (MPa) from Psi_S_cm (cm). Assumes that Psi_S_cm is positive (as it should be!)
-        self.Psi_S_MPa = -1 * self.Psi_S_cm / 100 / rho * g / 1E6 
-        self.Psi_L_MPa = -1 * self.Psi_l_cm / 100 / rho * g / 1E6
+        self.Psi_S_MPa = -1 * self.Psi_S_cm / 100 * rho * g / 1E6 
+        self.Psi_L_MPa = -1 * self.Psi_l_cm / 100 * rho * g / 1E6
 
         # This version of sfc calculation comes from Laio et al. 2001b. Specifically, cf. the discussion
         # on p.714, and equation 15. 
         self.sfc = pow(0.05/60/24/(self.Ks*10),1/(2*self.b+3))  # Convert Ks in mm/day 
+        # Make sure that field capacity is always lower than soil porosity.
+        if self.sfc > self.n:
+            raise ValueError("soil field capacity, {sfc} is larger than porosity, {n}".format(
+                sfc=self.sfc,
+                n=self.n
+            ))
         # Hygroscopic point is when soil is so dry no further evaporation will occur.
-        self.sh = self.s(self.theta(-12))               # Hygroscopic point in relative soil moisture [0-1]
+        self.sh = self.s(psi=-12)  # Hygroscopic point in relative soil moisture [0-1]
         self.nZr = None
 
     def _check_nZr(self):
@@ -210,8 +216,9 @@ class Soil():
             theta = soil water content [m^3/m^3]
         
         """
-        self._check_theta(theta)          
-        return round(self.Psi_S_MPa * pow(self.n/theta,self.b),PRECISION)
+        self._check_theta(theta)
+        s = self.s(theta=theta)          
+        return round(self.Psi_S_MPa * pow(s,-self.b),PRECISION)
     
     def theta(self,psi):
         """ Return a volumetric water content in m^3/m^3 
@@ -228,19 +235,34 @@ class Soil():
         # Ensure result is rounded to correct precision and that we do not exceed porosity
         return min([round((self.n * pow(psi/self.Psi_S_MPa, 1/-self.b)),PRECISION), self.n])
 
-    def s(self,theta):
+    def s(self,theta=None,psi=None):
         """ Return a relative soil moisture value, s [0-1]
-        given a volumetric water content [m^3/m^3]
+        given a volumetric water content [m^3/m^3] or a 
+        water potential [MPa]
 
         Usage: s(theta):
 
             theta = volumetric water content [m^3/m^3]
+            psi = water potential [MPa]
 
         Note: theta must be in the interval 0-n (porosity)
+        Note: psi must be negative
+        Note: Function must be called with either theta or psi, but not both.
         
         """
+        if theta and psi:
+            raise ValueError(
+            "Both theta ({theta}) and psi {psi} values provided only one argument allowed".format(
+                theta=theta,
+                psi=psi
+            ))
+        if psi:
+            theta = self.theta(psi)
         self._check_theta(theta)
-        return round(theta/self.n, PRECISION)
+        try:
+            return round(theta/self.n, PRECISION)
+        except:
+            raise ValueError("Either theta or psi must be provided as an argument.")
 
     def set_nZr(self,plant):
         """ Sets the nZr for this soil in order to 
