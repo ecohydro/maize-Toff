@@ -179,8 +179,7 @@ class Soil():
         
         # Set Psi_S (MPa) from Psi_S_cm (cm). Assumes that Psi_S_cm is positive (as it should be!)
         self.Psi_S_MPa = -1 * self.Psi_S_cm / 100 * rho * g / 1E6 
-        self.Psi_L_MPa = -1 * self.Psi_l_cm / 100 * rho * g / 1E6
-
+        
         # This version of sfc calculation comes from Laio et al. 2001b. Specifically, cf. the discussion
         # on p.714, and equation 15. 
         self.sfc = pow(0.05/60/24/(self.Ks*10),1/(2*self.b+3))  # Convert Ks in mm/day 
