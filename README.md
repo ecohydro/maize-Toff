@@ -15,7 +15,7 @@ Note: To update dependecies in an existing environment, use `conda env update --
 
 ## Directory structure
 
-### py/
+### farm/
 * where models are stored
 
 ### data/
@@ -108,19 +108,23 @@ Combining the prior three steps, we can create a model instance and run the mode
 ```python
 
 # Import the necessary objects:
-from py.climate import Climate
-from py.soil import Soil
-from py.plant import Crop
-from py.model import CropModel
+from farm.climate import Climate
+from farm.soil import Soil
+from farm.plant import Crop
+from farm.model import CropModel
 
 # Make the things
 climate = Climate() # uses default climate values
 soil = Soil('sand')
 crop = Crop(kc_max=1.2, LAI_max=2.0, T_max=4.0, soil=soil)
-model = Model(crop=crop,soil=soil,climate=climate)
+
+# Create the model
+model = CropModel(crop=crop,soil=soil,climate=climate)
 
 # RUN IT.
 model.run() # TADA!
+
+model.output()
 
 ```
 ### Getting model output 
