@@ -23,4 +23,4 @@ class TestModel(unittest.TestCase):
         self.model = CropModel(crop=crop,soil=soil,climate=climate)
 
     def test_cropModel(self):
-        assert(isinstance(self.model.R, np.ndarray), "R value is an ndarray")
+        assert isinstance(self.model.R, np.ndarray), "R value is an ndarray"
