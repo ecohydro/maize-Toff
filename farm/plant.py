@@ -108,7 +108,14 @@ class Crop(Plant):
         Note: p=1 assumes a linear relationship between LAI and kc
 
         """
-        return pow((self.LAI_max/self.kc_max),p) * self.calc_kc(day_of_season)
+        #print(self.LAI_max)
+        #print(self.kc_max)
+        #print(day_of_season)
+
+        kc = self.calc_kc(day_of_season)
+        #print(kc)
+
+        return pow((self.LAI_max/self.kc_max),p) * kc
 
     def calc_T(self, s, t):
         """ Calculates Transpiration variable as a stepwise

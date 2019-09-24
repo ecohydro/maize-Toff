@@ -154,3 +154,14 @@ output['ET'].plot()
 output['s'].plot()
 
 ```
+
+## Test the model
+
+### Basic testing framework
+From the root of the directory, run the following in the command line to put `farm` into your python path in editable mode. 
+
+` pip install -e .`
+
+After that, run tests from the root of the project:
+
+`nosetests -vv test_sand`

@@ -53,8 +53,16 @@ class Climate():
             E = E_max * [(s-sh)/(1-sh)]^q
 
         """
+        if LAI == None:
+            raise ValueError("Climate calc_E expects LAI that's not None.")
+
         k = -0.5
+        #print("k:",-k)
+        #print("ET_max:",self.ET_max)
+        #print("LAI:",LAI)
         E_max_p = self.ET_max*exp(-k*LAI) # plant.calc_LAI(t)/plant.LAI_max)
+        #print(E_max_p)
+
         return pow((s-sh)/(1-sh), q)*E_max_p
 
     @staticmethod # Static methods can be called without instancing the class.
