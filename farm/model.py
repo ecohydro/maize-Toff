@@ -68,7 +68,7 @@ class CropModel():
                             # during model time step calculations.
         
     def run(self):
-        for t in range(self.n_days):
+        for t in range(1, self.n_days):
             try:
                 # 0. Update the crop coefficient
                 # TODO: Edit Crop class to make this dynamic.
@@ -77,11 +77,9 @@ class CropModel():
 
                 # 2. Calculate ET terms
                 self.T[t] = self.crop.calc_T(self.s[t],t)   # mm/day
-                self.E[t] = self.climate.calc_E(
-                    self.s[t],
-                    t,
-                    plant=self.crop,
-                    soil=self.soil) # mm/day
+                self.E[t] = self.climate.calc_E(self.s[t], t, LAI=self.LAI[t], sh = self.soil.sh)#,
+                    #plant=self.crop,
+                    #soil=self.soil) # mm/day
                 self.ET[t] = self.T[t] + self.E[t]
                 
                 # 1. Update Soil Moisture Water Balance (Part 1)
