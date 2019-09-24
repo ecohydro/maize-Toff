@@ -1,5 +1,5 @@
 """
-Name:           test_model.py
+Name:           test_sand.py
 Compatibility:  Python 3.7
 Description:    Integration test of the model
 
@@ -14,7 +14,7 @@ from farm import Soil
 from farm import Crop
 from farm import CropModel
 
-class TestModel(unittest.TestCase):
+class TestSand(unittest.TestCase):
 
     def setUp(self):
         climate = Climate()
@@ -22,5 +22,9 @@ class TestModel(unittest.TestCase):
         crop = Crop(soil=soil)
         self.model = CropModel(crop=crop,soil=soil,climate=climate)
 
-    def test_cropModel(self):
-        assert isinstance(self.model.R, np.ndarray), "R value is an ndarray"
+	# write tests
+    def test_sh(self):
+        assert self.model.soil.sh <= self.model.crop.sw, "Should be true"
+
+    def test_star(self):
+        assert self.model.crop.s_star <= self.model.soil.sfc, "Error: s_star is too high: it should be less than field capacity"
