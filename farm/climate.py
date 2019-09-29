@@ -5,7 +5,7 @@ from numpy.random import exponential, uniform
 class Climate():
     """ Creates a daily rainfall timeseries for use in ecohydrological modeling
 
-    Usage: climate = Climate(alpha_r,lambda_r,t_seas,ET_max)
+    Usage: climate = Climate(alpha_r, lambda_r, t_seas, ET_max)
 
         alpha_r = average storm depth [mm]
         lambda_r = storm frequency [day^-1]
@@ -39,7 +39,7 @@ class Climate():
             self.key = value
 
 
-    def calc_E(self, s, t, q=4, sh=None, LAI=None):  # soil=None, plant=None): 
+    def calc_E(self, s, q=2, LAI=None, sh=None): 
         """ Determines the daily evaporation as a function of relative soil moisture
 
         Usage: calc_E(s)
@@ -47,8 +47,6 @@ class Climate():
             TODO: Update parameters.
 
             s = relative soil moisture [0-1]
-            t = day of season
-
             E_max_p = E_max * exp(-k * LAI)
             E = E_max * [(s-sh)/(1-sh)]^q
 
@@ -56,14 +54,12 @@ class Climate():
         if LAI == None:
             raise ValueError("Climate calc_E expects LAI that's not None.")
 
-        k = -0.5
-        #print("k:",-k)
-        #print("ET_max:",self.ET_max)
-        #print("LAI:",LAI)
-        E_max_p = self.ET_max*exp(-k*LAI) # plant.calc_LAI(t)/plant.LAI_max)
-        #print(E_max_p)
-
-        return pow((s-sh)/(1-sh), q)*E_max_p
+        k = 0.5
+        E_max_p = self.ET_max*exp(-k*LAI) 
+        if s >= sh:
+            return pow((s-sh)/(1-sh), q)*E_max_p
+        else:
+            return 0
 
     @staticmethod # Static methods can be called without instancing the class.
     def generate(alpha_r, lambda_r, t_seas):
