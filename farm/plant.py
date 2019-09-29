@@ -48,7 +48,7 @@ class Crop(Plant):
         self.T_max = T_max        # Maximum crop water use [mm/day]
         super(Crop, self).__init__(*args, **kwargs)
 
-    def calc_kc(self, day_of_season, t_seas = 120, f1 = 0.2, f2 = 0.5, f3 = 0.75, EoS = 1.0, kc_ini = 0.30, kc_max = 1.2, kc_EoS = 0.6):
+    def calc_kc(self, day_of_season, t_seas = 180, f1 = 0.2, f2 = 0.5, f3 = 0.75, EoS = 1.0, kc_ini = 0.30, kc_max = 1.2, kc_EoS = 0.6):
         """ Calculates crop coefficient that varies throughout the season 
         
         Usage: calc_kc(self, day_of_season, t_seas = 120, f1 = 0.2, f2 = 0.5, f3 = 0.75, EoS = 1.0, kc_ini = 0.30, kc_max = 1.2, kc_EoS = 0.6)
@@ -80,8 +80,6 @@ class Crop(Plant):
             #return self.kc_max # previously this was the last line of the function
 
 
-
-    
     def calc_T_max(self, t):
         """ Calculates max Transpiration variable.
         
@@ -101,21 +99,16 @@ class Crop(Plant):
         
         Usage: calc_LAI(t, p=1)
 
-        LAI = (LAI_max/kc_max)^p * kc(t),
-
-        where kc varies through the season according to calc_kc(t) 
+            LAI = (LAI_max/kc_max)^p * kc(t),
+            where kc varies through the season according to calc_kc(t) 
 
         Note: p=1 assumes a linear relationship between LAI and kc
 
         """
-        #print(self.LAI_max)
-        #print(self.kc_max)
-        #print(day_of_season)
-
         kc = self.calc_kc(day_of_season)
-        #print(kc)
 
         return pow((self.LAI_max/self.kc_max),p) * kc
+        LAI = pow((self.LAI_max/self.kc_max),p) * kc
 
     def calc_T(self, s, t):
         """ Calculates Transpiration variable as a stepwise
