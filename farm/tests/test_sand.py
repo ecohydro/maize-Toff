@@ -14,15 +14,16 @@ from farm import Soil
 from farm import Crop
 from farm import CropModel
 
+
 class TestSand(unittest.TestCase):
 
     def setUp(self):
         climate = Climate()
         soil = Soil('sand')
         crop = Crop(soil=soil)
-        self.model = CropModel(crop=crop,soil=soil,climate=climate)
+        self.model = CropModel(crop=crop, soil=soil, climate=climate)
 
-	# write tests
+    # write tests
     def test_sh(self):
         assert self.model.soil.sh <= self.model.crop.sw, "Should be true"
 

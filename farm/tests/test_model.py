@@ -14,13 +14,14 @@ from farm import Soil
 from farm import Crop
 from farm import CropModel
 
+
 class TestModel(unittest.TestCase):
 
     def setUp(self):
         climate = Climate()
         soil = Soil('sand')
         crop = Crop(soil=soil)
-        self.model = CropModel(crop=crop,soil=soil,climate=climate)
+        self.model = CropModel(crop=crop, soil=soil, climate=climate)
 
     def test_cropModel(self):
         assert isinstance(self.model.R, np.ndarray), "R value is an ndarray"

@@ -15,13 +15,14 @@ from farm import Soil
 from farm import Crop
 from farm import CropModel
 
+
 class TestKc(unittest.TestCase):
 
     def setUp(self):
         climate = Climate()
         soil = Soil('sand')
         crop = Crop(soil=soil)
-        self.model = CropModel(crop=crop,soil=soil,climate=climate)
+        self.model = CropModel(crop=crop, soil=soil, climate=climate)
 
         #%% Plot Kc
         d = np.arange(121)
@@ -30,6 +31,6 @@ class TestKc(unittest.TestCase):
         plt.xlabel('Time of Season, $\mathit{t}$')
         plt.show()
 
-	# write tests
+    # write tests
     def inspect_kc(self):
         assert max(model.kc) == 1.2, "Should be true"
