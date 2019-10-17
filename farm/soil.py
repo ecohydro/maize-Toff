@@ -331,6 +331,8 @@ class Soil():
         
         Notes:
             v1. All soils are assumed to drain to field capacity each day.
+            v2. TODO: We determine the daily Leakage using the K(s) function
+                and integrating over a day.
 
         """
         L = 0
