@@ -167,6 +167,6 @@ After that, run tests from the root of the project:
 `nosetests -vv test_sand`
 
 ### Checking test coverage
-Update the coverage for the model before pushing new commits, or in advance of a pull request. You can update the coverage using the following command
+Update the coverage for the model before pushing new commits, or in advance of a pull request. You can update the coverage using the following command:
 
-` 
+` nosetests -vv ./farm/tests --with-coverage --cover-package=farm --cover-html --cover-html-dir=coverage_html_report/ `

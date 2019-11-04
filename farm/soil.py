@@ -14,6 +14,8 @@ PRECISION = 2   # Number of decimal places of precision in calculations (default
 
 #%% DATA FROM CLAPP AND HORBERGER (C&H) 1978, Table 2:
 
+field_capacity = -33 / 1000 # Field capacity in MPa.
+
 soils = {
     'sand':{
         'b': 4.05,
@@ -183,6 +185,7 @@ class Soil():
         # This version of sfc calculation comes from Laio et al. 2001b. Specifically, cf. the discussion
         # on p.714, and equation 15. 
         self.sfc = pow(0.05/(self.Ks*60*24),1/(2*self.b+3))  # Convert Ks in cm/day 
+        self.sfc = self.s(psi=field_capacity)
         # Make sure that field capacity is always lower than soil porosity.
         if self.sfc > 1:
             raise ValueError("soil field capacity, {sfc} is larger than 1".format(

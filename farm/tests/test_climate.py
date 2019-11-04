@@ -1,10 +1,11 @@
 """
-Name:           test_model.py
+Name:           test_climate.py
 Compatibility:  Python 3.7
 Description:    Integration test of the model
 
 URL:            https://github.com/ecohydro/maize-Toff
 """
+
 
 import unittest
 import numpy as np
@@ -15,11 +16,5 @@ from farm import Crop
 from farm import CropModel
 
 
-class TestModel(unittest.TestCase):
-
-    def setUp(self):
-        climate = Climate()
-        
-    def test_climate_init_with_int(self):
-       pass
+class TestClimate(unittest.TestCase):
     
