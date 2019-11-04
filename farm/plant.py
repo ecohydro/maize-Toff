@@ -80,54 +80,68 @@ class Crop(Plant):
             #return self.kc_max # previously this was the last line of the function
 
 
-    def calc_T_max(self, t):
+    def calc_T_max(self, kc):
         """ Calculates max Transpiration variable.
         
-        Usage: calc_T_max(t)
+        Usage: calc_T_max(kc)
 
-            t = day of season
 
-        T = kc(t) * T_max
+        T = kc * T_max
             
         """
-        return self.calc_kc(t) * self.T_max
+        return kc * self.T_max
 
-    def calc_LAI(self, day_of_season, p=1):
+    def _kc_from_LAI(self, LAI, p=1):
+        """ Returns a kc variable. kc comes
+            from function of LAI. Currently based on linear relationship 
+            between kc and LAI (assumption).
+        
+        Usage: _kc_from_LAI(LAI, p=1)
+
+            kc = (kc_max/LAI_max)^p * LAI.
+            
+        Note: p=1 assumes a linear relationship between LAI and kc
+
+        """
+        return pow((self.kc_max/self.LAI_max),p) * LAI
+
+    def _LAI_from_kc(self, kc, p=1):
         """ Returns a Leaf Area Index (LAI) variable. LAI comes
             from function of kc. Currently based on linear relationship 
             between kc and LAI (assumption).
         
-        Usage: calc_LAI(t, p=1)
+        Usage: _LAI_from_kc(kc, p=1)
 
-            LAI = (LAI_max/kc_max)^p * kc(t),
-            where kc varies through the season according to calc_kc(t) 
+            LAI = (LAI_max/kc_max)^p * kc.
 
         Note: p=1 assumes a linear relationship between LAI and kc
 
         """
-        kc = self.calc_kc(day_of_season)
-
         return pow((self.LAI_max/self.kc_max),p) * kc
-        LAI = pow((self.LAI_max/self.kc_max),p) * kc
-
-    def calc_T(self, s, t):
-        """ Calculates Transpiration variable as a stepwise
-            linear function.
         
-        Usage: calc_T(s, t)
+    def calc_T(self, s, LAI=None, kc=None):
+        """ Calculates Transpiration variable as a stepwise
+            linear function. Will use LAI value if both LAI 
+            and kc are provided.
+        
+        Usage: calc_T(s, LAI, kc)
         
             s = relative soil moisture [0-1]
-            t = day of season
+            LAI = leaf area index [m2/m2]
+            kc = crop coefficient [-].
 
+        Note: Either LAI or kc must be provided.
+        
         """
-        if not s <= 1:
-            raise ValueError("Time stemp {t}: s ({s}) must be <= 1".format(
-                t=t,
-                s=s))
-        if s>=self.s_star:
-            return self.calc_T_max(t)
-        elif s>=self.sw:
-            return (s-self.sw)/(self.s_star-self.sw)*self.calc_T_max(t)
-        else:
-            return 0
+        if not LAI and not kc:
+            raise(ValueError, "Function requires either LAI or kc to be set.")
+        if LAI:
+            kc = _kc_from_LAI(LAI)
+        if kc:
+            if s>=self.s_star:
+                return self.calc_T_max(kc)
+            elif s>=self.sw:
+                return (s-self.sw)/(self.s_star-self.sw)*self.calc_T_max(kc)
+            else:
+                return 0
 
