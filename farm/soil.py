@@ -1,3 +1,7 @@
+#%% Soil Class Definition
+from math import exp
+from math import log as ln # This is kind of janky! Could use numpy instead
+
 """
 This is the "example" module.
 
@@ -5,6 +9,8 @@ The example module supplies one function, factorial().  For example,
 
 >>> Soil('Sand')
 <__main__.Soil object at 0x7fe13f96f0b8>
+
+# TODO: Maybe move soil parameters out of this class. 
 """
 
 #%% Set parameters related to soils and siginificant digits
@@ -285,6 +291,7 @@ class Soil():
         """
         self.nZr = self.n * plant.Zr 
         return self.nZr 
+
     
     def calc_Q(self,s,units='mm/day'):
         """ Determines runoff as a function of relative soil moisture
@@ -347,6 +354,92 @@ class Soil():
         else:
             return L
 
+
+    def calc_LQ(self, s, t, plant, units='mm/day'):
+        """ Calculates the time evolution of soil moisture
+        # previously in arguments (not needed?): beta = None, eta = None, mu = None, 
+        # Is it necessary to give crop to plant?
+
+        Usage: calc_LQ(s, plant=crop, units)
+
+            # TODO: All of this needs to be fixed
+            # TODO: Rename t as day_of_season? day_of_season
+            
+            # Calculate B for b related to soil type.
+            beta = 2 * b + 4 
+
+            # Define eta and mu
+            eta_w = E_w / nZr
+            eta = E_max / nZr
+            mu = K_s / nZr * ( e^beta (1 - s_fc) - )
+
+            # Calculate time variables
+            t_sfc = 1 / ( beta * (mu - eta) ) * (
+                    beta * (s_fc - s_0) + 
+                    ln( eta - mu + mu * e^( beta(s_0 - s_fc) ) / eta ) )
+
+            t_s_star = (s_fc - s_star) / eta + t_sfc
+
+            t_sw = (s_star - s_w) / (eta - eta_w) * ln(eta / eta_w) + t_s_star
+
+            s(t) = 
+                0 <= t < t_sfc ... next part
+
+        
+        Returns:
+
+            s(t) = soil moisture [mm/day] if units='mm/day' 
+
+        Notes:
+            TODO: We have not defined t.
+            CHECK: s_0 is the same as s
+            CHECK: b is a property of soil above and needs to be calculated for each soil: B
+
+        """
+        # #TODO: Start off with S_0 as 0, need to figure this out if that's the case
+        s_0 = 0
+
+        # Calculate B for b related to soil type.
+        beta = 2 * self.b + 4 
+
+
+        # TODO: Fix climate variables
+        E_w = 3
+        E_max = 4
+
+        # TODO: Is s_0 the same as s? If so, change self.s to self.s_0, previously ran into the error:
+        # AttributeError: 'Soil' object has no attribute 's_0'
+        # Got the same error with self.s0
+
+        # Define eta and mu
+        eta_w = E_w / self.nZr # TODO: We do not have a variable for E_w so it is standing in as 3.
+
+        eta = E_max / self.nZr # TODO: E_max comes from climate; how do I get that in here?
+
+        mu =  self.Ks / (self.nZr * ( exp( beta*(1 - self.sfc) ) - 1 ))
+
+        # Calculate time variables
+        t_sfc = 1 / ( beta * (mu - eta) ) * (
+                    beta * (self.sfc - s_0) + #TODO: I'm not sure if this "s" is correct.
+                    ln( eta - mu + mu * exp( beta * (s_0 - self.sfc) ) / eta ) )
+
+        # TODO: s_star is a property of plant...
+        t_s_star = (self.sfc - plant.s_star) / eta + t_sfc
+
+        t_sw = (plant.s_star - plant.sw) / (eta - eta_w) * ln(eta / eta_w) + t_s_star
+
+        # Now we can go onto the s(t) calculations...
+        if not t >= 0:
+            raise ValueError ("t must be >= 0")
+       
+        if t <= t_sfc:
+            return s -  1 / beta * ln( 
+                (eta - mu + mu * exp(beta*(s_0 - self.sfc)) * exp( beta * (eta - mu ) * t ) 
+                - mu * exp( beta * (s_0 - self.sfc)) 
+                )
+                / (eta - mu )
+                )
+        # TODO: Finish the conditions
 
 if __name__ == "__main__":
     import doctest
