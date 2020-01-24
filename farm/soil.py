@@ -362,27 +362,44 @@ class Soil():
 
 
     def calc_L(self, s0, Emax=0, units='mm/day'):
-        """ Calculates daily leakage loss in mm/day
-        # previously in arguments (not needed?): beta = None, eta = None, mu = None, 
-        # Is it necessary to give crop to plant?
+        """ Calculates daily leakage loss as a function of initial soil moisture in mm/day
 
-        Usage: calc_LQ(s, plant=crop, units)
+        Usage: calc_L(s0, Emax=0, units)
 
-            # TODO: All of this needs to be fixed
-            # TODO: Rename t as day_of_season? day_of_season
-            
-            # Calculate B for b related to soil type.
-            beta = 2 * b + 4 
-
-            # Define eta and mu
-            eta_w = E_w / nZr
-            eta = E_max / nZr
-            mu = K_s / nZr * ( e^beta (1 - s_fc) - )
+            s0 = initial soil moisture [0-1]
+            units = units to return leakage in
+                options are 'mm/day' (default). 
+                Otherwise, returns in [0-1] relative soil 
+                moisture
         
+            self._check_nZr()
+      
+            if s0 > self.sfc:
+                t = min(self.calc_t_sfc(s0, Emax=Emax),1)
+                
+                # Calculate B for b related to soil type.
+                beta = 2 * self.b + 4 
+
+                # Define eta and m
+                eta = Emax / self.nZr 
+                m =  self.Ks / (self.nZr * ( exp( beta*(1 - self.sfc) ) - 1 ))        
+               
+                L = (1 / beta * ln( 
+                    (eta - m + m * exp(beta*(s0 - self.sfc)) * exp( beta * (eta - m ) * t ) 
+                    - m * exp( beta * (s0 - self.sfc)) 
+                    ) / (eta - m ) ) )
+                if units=='mm/day':
+                    return L * self.nZr
+                else:
+                    # Assumes if units aren't mm/day we want units of saturation/day
+                    return L
+            else:
+                return 0
+
         Returns:
 
             L = Leakage [mm/day] if units='mm/day' 
-
+            else returns [0-1]
             
         """
         self._check_nZr()
