@@ -334,7 +334,7 @@ class Soil():
         """ Calculate the time until soil moisture reaches field capacity,
             starting from an intitial condition.
 
-        Usage: calc_time_to_sfc(s,units)
+        Usage: calc_time_to_sfc(s0,units)
 
             s0 = initial relative soil moisture [0-1]
             
@@ -343,10 +343,9 @@ class Soil():
             time until soil moisture reaches field capacity [days]
 
         Notes:
-            v1. Using the equation defined in 
+            v1. Using the equation defined in Laio et al. 2001, which included nZr
         
         """
-
         self._check_nZr()
         if s0 > self.sfc:
 
@@ -405,23 +404,27 @@ class Soil():
         self._check_nZr()
   
         if s0 > self.sfc:
+            # If leakage loss is greater than a day then use initial s, s0.
             t = min(self.calc_t_sfc(s0, Emax=Emax),1)
             
             # Calculate B for b related to soil type.
             beta = 2 * self.b + 4 
 
+            # Name temp variables for improved readability
+            sfc = self.sfc
+            nZr = self.nZr
+
             # Define eta and m
             # Don't need eta because no dependence on climate
-            eta = Emax / self.nZr 
-            m =  self.Ks / (self.nZr * ( exp( beta*(1 - self.sfc) ) - 1 ))        
+            eta = Emax / nZr 
+            m =  self.Ks / (nZr * ( exp( beta*(1 - sfc) ) - 1 ))  
            
             L = (1 / beta * ln( 
-                (eta - m + m * exp(beta*(s0 - self.sfc)) * exp( beta * (eta - m ) * t ) 
-                - m * exp( beta * (s0 - self.sfc)) 
-                )
-                / (eta - m )                ))
+                (eta - m + m * exp(beta*(s0 - sfc)) * exp( beta * (eta - m ) * t ) 
+                - m * exp( beta * (s0 - sfc) ) )
+                / (eta - m ) ) )
             if units=='mm/day':
-                return L * self.nZr
+                return L * nZr
             else:
                 # Assumes if units aren't mm/day we want units of saturation/day
                 return L
