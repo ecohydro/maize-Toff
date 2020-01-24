@@ -73,10 +73,10 @@ class CropModel():
                 # 0. Update the crop coefficient
                 # TODO: Edit Crop class to make this dynamic.
                 self.kc[t] = self.crop.calc_kc(t)
-                self.LAI[t] = self.crop.calc_LAI(t)
+                self.LAI[t] = self.crop.calc_LAI(self.kc[t])
 
                 # 2. Calculate ET terms
-                self.T[t] = self.crop.calc_T(self.s[t],t)   # mm/day
+                self.T[t] = self.crop.calc_T(self.s[t],LAI=self.LAI[t])   # mm/day
                 self.E[t] = self.climate.calc_E(self.s[t], LAI = self.LAI[t], sh = self.soil.sh)
                 self.ET[t] = self.T[t] + self.E[t]
                 

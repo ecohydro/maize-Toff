@@ -8,7 +8,7 @@ class Plant():
         Zr=500,             # Rooting depth [mm]
         T_max=4,            # Maximum transpiration [mm/day]
         sw_MPa = -1.5,      # wilting point of plant in water potential [MPa]
-        s_star_MPa = -0.03, # water potential of maximum transpiration [MPa], cf. Laio et al., 2001b, p.713
+        s_star_MPa = -0.05, # water potential of maximum transpiration [MPa], 
         soil=None           # a soil in which this plant will grow
     ):
         self.Zr = Zr
@@ -133,10 +133,10 @@ class Crop(Plant):
         Note: Either LAI or kc must be provided.
 
         """
-        if not LAI and not kc:
-            raise(ValueError, "Function requires either LAI or kc to be set.")
+        #if not LAI and not kc:
+            #raise(ValueError, "Function requires either LAI or kc to be set.")
         if LAI:
-            kc = _kc_from_LAI(LAI)
+            kc = self._kc_from_LAI(LAI)
         if kc:
             if s>=self.s_star:
                 return self.calc_T_max(kc)
