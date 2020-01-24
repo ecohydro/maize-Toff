@@ -351,7 +351,7 @@ class Soil():
         else:
             return L
 
-    def calc_time_to_sfc(self,E_max,s0):
+    def calc_t_sfc(self,s0,Emax=None):
         """ Calculate the time until soil moisture reaches field capacity,
             starting from an intitial condition.
 
@@ -367,7 +367,10 @@ class Soil():
             v1. Using the equation defined in 
         
         """
-        self._check_theta()
+        from numpy import log as ln
+        from numpy import exp
+
+        self._check_nZr()
         if s0 > self.sfc:
 
             # The m term below is not the same as in Eq. 19 of Laio et al. 2001, which included nZr
