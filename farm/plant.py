@@ -105,12 +105,12 @@ class Crop(Plant):
         """
         return pow((self.kc_max/self.LAI_max),p) * LAI
 
-    def _LAI_from_kc(self, kc, p=1):
+    def calc_LAI(self, kc, p=1):
         """ Returns a Leaf Area Index (LAI) variable. LAI comes
             from function of kc. Currently based on linear relationship 
             between kc and LAI (assumption).
         
-        Usage: _LAI_from_kc(kc, p=1)
+        Usage: calc_LAI(kc, p=1)
 
             LAI = (LAI_max/kc_max)^p * kc.
 
@@ -131,7 +131,7 @@ class Crop(Plant):
             kc = crop coefficient [-].
 
         Note: Either LAI or kc must be provided.
-        
+
         """
         if not LAI and not kc:
             raise(ValueError, "Function requires either LAI or kc to be set.")
