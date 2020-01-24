@@ -330,37 +330,6 @@ class Soil():
         else:
             return Q
 
-    def calc_L(self,s,units='mm/day'):
-        """ Calculates leakage loss as a function of relative soil moisture
-
-
-        Usage: calc_L(s,units)
-
-            s = relative soil moisture [0-1]
-            units = units to return leakage in
-                options are 'mm/day' (default). 
-                Otherwise, returns in [0-1] relative soil 
-                moisture
-        Returns:
-
-            L(s) [mm/day] if units='mm/day'
-            else returns [0-1]
-        
-        Notes:
-            v1. All soils are assumed to drain to field capacity each day.
-            v2. TODO: We determine the daily Leakage using the K(s) function
-                and integrating over a day.
-
-        """
-        L = 0
-        if s > self.sfc:
-            L =  min(1, s)-self.sfc
-        if units == 'mm/day':
-            self._check_nZr()
-            return L * self.nZr
-        else:
-            return L
-
     def calc_t_sfc(self,s0,Emax=None):
         """ Calculate the time until soil moisture reaches field capacity,
             starting from an intitial condition.
