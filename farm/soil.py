@@ -1,6 +1,6 @@
 #%% Soil Class Definition
-from math import exp
-from math import log as ln # This is kind of janky! Could use numpy instead
+from numpy import log as ln
+from numpy import exp
 
 """
 This is the "example" module.
@@ -188,9 +188,12 @@ class Soil():
         # Set Psi_S (MPa) from Psi_S_cm (cm). Assumes that Psi_S_cm is positive (as it should be!)
         self.Psi_S_MPa = -1 * self.Psi_S_cm / 100 * rho * g / 1E6 
         
+        # Set Ks (mm/day) from Ks (cm/min).
+        self.Ks = self.Ks*10*60*24
+
         # This version of sfc calculation comes from Laio et al. 2001b. Specifically, cf. the discussion
         # on p.714, and equation 15. 
-        self.sfc = pow(0.05/(self.Ks*60*24),1/(2*self.b+3))  # Convert Ks in cm/day 
+        self.sfc = pow(0.05/(self.Ks/10),1/(2*self.b+3))  # Convert Ks in cm/day 
         self.sfc = self.s(psi=field_capacity)
         # Make sure that field capacity is always lower than soil porosity.
         if self.sfc > 1:
@@ -374,13 +377,11 @@ class Soil():
             v1. Using the equation defined in 
         
         """
-        from numpy import log as ln
-        from numpy import exp
 
         self._check_nZr()
         if s0 > self.sfc:
 
-            # The m term below is not the same as in Eq. 19 of Laio et al. 2001, which included nZr
+            # The m term below is the same as in Eq. 19 of Laio et al. 2001, which included nZr
             m = self.Ks/((exp(self.Beta*(1-self.sfc))-1)*self.nZr)
             eta = Emax/self.nZr
             beta = self.Beta
@@ -391,8 +392,8 @@ class Soil():
             return 0
 
 
-    def calc_LQ(self, s, t, plant, units='mm/day'):
-        """ Calculates the time evolution of soil moisture
+    def calc_L(self, s0, Emax=0, units='mm/day'):
+        """ Calculates daily leakage loss in mm/day
         # previously in arguments (not needed?): beta = None, eta = None, mu = None, 
         # Is it necessary to give crop to plant?
 
@@ -408,74 +409,40 @@ class Soil():
             eta_w = E_w / nZr
             eta = E_max / nZr
             mu = K_s / nZr * ( e^beta (1 - s_fc) - )
-
-            # Calculate time variables
-            t_sfc = 1 / ( beta * (mu - eta) ) * (
-                    beta * (s_fc - s_0) + 
-                    ln( eta - mu + mu * e^( beta(s_0 - s_fc) ) / eta ) )
-
-            t_s_star = (s_fc - s_star) / eta + t_sfc
-
-            t_sw = (s_star - s_w) / (eta - eta_w) * ln(eta / eta_w) + t_s_star
-
-            s(t) = 
-                0 <= t < t_sfc ... next part
-
         
         Returns:
 
-            s(t) = soil moisture [mm/day] if units='mm/day' 
+            L = Leakage [mm/day] if units='mm/day' 
 
-        Notes:
-            TODO: We have not defined t.
-            CHECK: s_0 is the same as s
-            CHECK: b is a property of soil above and needs to be calculated for each soil: B
-
+            
         """
-        # #TODO: Start off with S_0 as 0, need to figure this out if that's the case
-        s_0 = 0
+        self._check_nZr()
+  
+        if s0 > self.sfc:
+            t = min(self.calc_t_sfc(s0, Emax=Emax),1)
+            
+            # Calculate B for b related to soil type.
+            beta = 2 * self.b + 4 
 
-        # Calculate B for b related to soil type.
-        beta = 2 * self.b + 4 
-
-
-        # TODO: Fix climate variables
-        E_w = 3
-        E_max = 4
-
-        # TODO: Is s_0 the same as s? If so, change self.s to self.s_0, previously ran into the error:
-        # AttributeError: 'Soil' object has no attribute 's_0'
-        # Got the same error with self.s0
-
-        # Define eta and mu
-        eta_w = E_w / self.nZr # TODO: We do not have a variable for E_w so it is standing in as 3.
-
-        eta = E_max / self.nZr # TODO: E_max comes from climate; how do I get that in here?
-
-        mu =  self.Ks / (self.nZr * ( exp( beta*(1 - self.sfc) ) - 1 ))
-
-        # Calculate time variables
-        t_sfc = 1 / ( beta * (mu - eta) ) * (
-                    beta * (self.sfc - s_0) + #TODO: I'm not sure if this "s" is correct.
-                    ln( eta - mu + mu * exp( beta * (s_0 - self.sfc) ) / eta ) )
-
-        # TODO: s_star is a property of plant...
-        t_s_star = (self.sfc - plant.s_star) / eta + t_sfc
-
-        t_sw = (plant.s_star - plant.sw) / (eta - eta_w) * ln(eta / eta_w) + t_s_star
-
-        # Now we can go onto the s(t) calculations...
-        if not t >= 0:
-            raise ValueError ("t must be >= 0")
-       
-        if t <= t_sfc:
-            return s -  1 / beta * ln( 
-                (eta - mu + mu * exp(beta*(s_0 - self.sfc)) * exp( beta * (eta - mu ) * t ) 
-                - mu * exp( beta * (s_0 - self.sfc)) 
+            # Define eta and m
+            # Don't need eta because no dependence on climate
+            eta = Emax / self.nZr 
+            m =  self.Ks / (self.nZr * ( exp( beta*(1 - self.sfc) ) - 1 ))        
+           
+            L = (1 / beta * ln( 
+                (eta - m + m * exp(beta*(s0 - self.sfc)) * exp( beta * (eta - m ) * t ) 
+                - m * exp( beta * (s0 - self.sfc)) 
                 )
-                / (eta - mu )
-                )
-        # TODO: Finish the conditions
+                / (eta - m )                ))
+            if units=='mm/day':
+                return L * self.nZr
+            else:
+                # Assumes if units aren't mm/day we want units of saturation/day
+                return L
+        else:
+            return 0
+
+
 
 if __name__ == "__main__":
     import doctest
