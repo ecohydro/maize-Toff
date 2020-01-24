@@ -1,7 +1,0 @@
-name: maize-Toff
-dependencies:
-  - numpy
-  - pandas
-  - jupyter
-  - scipy
-  - matplotlib

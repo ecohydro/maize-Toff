@@ -131,7 +131,7 @@ class Crop(Plant):
             kc = crop coefficient [-].
 
         Note: Either LAI or kc must be provided.
-        
+
         """
         #if not LAI and not kc:
             #raise(ValueError, "Function requires either LAI or kc to be set.")

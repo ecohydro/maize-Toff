@@ -197,6 +197,11 @@ class Soil():
             raise ValueError("soil field capacity, {sfc} is larger than 1".format(
                 sfc=self.sfc
             ))
+
+        # Set parameters related to pore size distribution index:
+        self.Beta = 2*self.b + 4
+        self.c = 2*self.b + 3
+
         # Hygroscopic point is when soil is so dry no further evaporation will occur.
         self.sh = self.s(self.theta(-12))               # Hygroscopic point in relative soil moisture [0-1] # TODO: We also set this to -100 for testing
         self.nZr = None                                 # TODO: Hygroscopic point is a wonky parameter stuck in the middle code.. consider setting elsewhere
@@ -241,7 +246,6 @@ class Soil():
             raise ValueError("psi, {psi}, must be less than or equal to zero.".format(psi=psi))
         # Ensure result is rounded to correct precision and that we do not exceed porosity
         return min([round((self.n * pow(psi/self.Psi_S_MPa, 1/-self.b)),PRECISION), self.n]) 
-
 
     def s(self,theta=None,psi=None):
         """ Return a relative soil moisture value, s [0-1]
@@ -353,6 +357,35 @@ class Soil():
             return L * self.nZr
         else:
             return L
+
+    def calc_time_to_sfc(self,E_max,s0):
+        """ Calculate the time until soil moisture reaches field capacity,
+            starting from an intitial condition.
+
+        Usage: calc_time_to_sfc(s,units)
+
+            s0 = initial relative soil moisture [0-1]
+            
+        Returns:
+
+            time until soil moisture reaches field capacity [days]
+
+        Notes:
+            v1. Using the equation defined in 
+        
+        """
+        self._check_theta()
+        if s0 > self.sfc:
+
+            # The m term below is not the same as in Eq. 19 of Laio et al. 2001, which included nZr
+            m = self.Ks/((exp(self.Beta*(1-self.sfc))-1)*self.nZr)
+            eta = Emax/self.nZr
+            beta = self.Beta
+            sfc = self.sfc
+            t_sfc = 1/(beta*(m-eta))*(beta*(sfc-s0)+ln((eta-m+m*exp(beta*(s0-sfc)))/eta))
+            return t_sfc
+        else:
+            return 0
 
 
     def calc_LQ(self, s, t, plant, units='mm/day'):
