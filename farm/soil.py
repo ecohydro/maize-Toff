@@ -1,3 +1,7 @@
+#%% Soil Class Definition
+from numpy import log as ln
+from numpy import exp
+
 """
 This is the "example" module.
 
@@ -5,6 +9,8 @@ The example module supplies one function, factorial().  For example,
 
 >>> Soil('Sand')
 <__main__.Soil object at 0x7fe13f96f0b8>
+
+# TODO: Maybe move soil parameters out of this class. 
 """
 
 #%% Set parameters related to soils and siginificant digits
@@ -182,9 +188,12 @@ class Soil():
         # Set Psi_S (MPa) from Psi_S_cm (cm). Assumes that Psi_S_cm is positive (as it should be!)
         self.Psi_S_MPa = -1 * self.Psi_S_cm / 100 * rho * g / 1E6 
         
+        # Set Ks (mm/day) from Ks (cm/min).
+        self.Ks = self.Ks*10*60*24
+
         # This version of sfc calculation comes from Laio et al. 2001b. Specifically, cf. the discussion
         # on p.714, and equation 15. 
-        self.sfc = pow(0.05/(self.Ks*60*24),1/(2*self.b+3))  # Convert Ks in cm/day 
+        self.sfc = pow(0.05/(self.Ks/10),1/(2*self.b+3))  # Convert Ks in cm/day 
         self.sfc = self.s(psi=field_capacity)
         # Make sure that field capacity is always lower than soil porosity.
         if self.sfc > 1:
@@ -289,6 +298,7 @@ class Soil():
         """
         self.nZr = self.n * plant.Zr 
         return self.nZr 
+
     
     def calc_Q(self,s,units='mm/day'):
         """ Determines runoff as a function of relative soil moisture
@@ -320,42 +330,11 @@ class Soil():
         else:
             return Q
 
-    def calc_L(self,s,units='mm/day'):
-        """ Calculates leakage loss as a function of relative soil moisture
-
-
-        Usage: calc_L(s,units)
-
-            s = relative soil moisture [0-1]
-            units = units to return leakage in
-                options are 'mm/day' (default). 
-                Otherwise, returns in [0-1] relative soil 
-                moisture
-        Returns:
-
-            L(s) [mm/day] if units='mm/day'
-            else returns [0-1]
-        
-        Notes:
-            v1. All soils are assumed to drain to field capacity each day.
-            v2. TODO: We determine the daily Leakage using the K(s) function
-                and integrating over a day.
-
-        """
-        L = 0
-        if s > self.sfc:
-            L =  min(1, s)-self.sfc
-        if units == 'mm/day':
-            self._check_nZr()
-            return L * self.nZr
-        else:
-            return L
-
     def calc_t_sfc(self,s0,Emax=None):
         """ Calculate the time until soil moisture reaches field capacity,
             starting from an intitial condition.
 
-        Usage: calc_time_to_sfc(s,units)
+        Usage: calc_time_to_sfc(s0,units)
 
             s0 = initial relative soil moisture [0-1]
             
@@ -364,16 +343,13 @@ class Soil():
             time until soil moisture reaches field capacity [days]
 
         Notes:
-            v1. Using the equation defined in 
+            v1. Using the equation defined in Laio et al. 2001, which included nZr
         
         """
-        from numpy import log as ln
-        from numpy import exp
-
         self._check_nZr()
         if s0 > self.sfc:
 
-            # The m term below is not the same as in Eq. 19 of Laio et al. 2001, which included nZr
+            # The m term below is the same as in Eq. 19 of Laio et al. 2001, which included nZr
             m = self.Ks/((exp(self.Beta*(1-self.sfc))-1)*self.nZr)
             eta = Emax/self.nZr
             beta = self.Beta
@@ -382,6 +358,81 @@ class Soil():
             return t_sfc
         else:
             return 0
+
+            # TODO: Remove Emax from calc_t_sfc
+
+
+    def calc_L(self, s0, Emax=0, units='mm/day'):
+        """ Calculates daily leakage loss as a function of initial soil moisture in mm/day
+
+        Usage: calc_L(s0, Emax=0, units)
+
+            s0 = initial soil moisture [0-1]
+            units = units to return leakage in
+                options are 'mm/day' (default). 
+                Otherwise, returns in [0-1] relative soil 
+                moisture
+        
+            self._check_nZr()
+      
+            if s0 > self.sfc:
+                t = min(self.calc_t_sfc(s0, Emax=Emax),1)
+                
+                # Calculate B for b related to soil type.
+                beta = 2 * self.b + 4 
+
+                # Define eta and m
+                eta = Emax / self.nZr 
+                m =  self.Ks / (self.nZr * ( exp( beta*(1 - self.sfc) ) - 1 ))        
+               
+                L = (1 / beta * ln( 
+                    (eta - m + m * exp(beta*(s0 - self.sfc)) * exp( beta * (eta - m ) * t ) 
+                    - m * exp( beta * (s0 - self.sfc)) 
+                    ) / (eta - m ) ) )
+                if units=='mm/day':
+                    return L * self.nZr
+                else:
+                    # Assumes if units aren't mm/day we want units of saturation/day
+                    return L
+            else:
+                return 0
+
+        Returns:
+
+            L = Leakage [mm/day] if units='mm/day' 
+            else returns [0-1]
+            
+        """
+        self._check_nZr()
+  
+        if s0 > self.sfc:
+            # If leakage loss is greater than a day then use initial s, s0.
+            t = min(self.calc_t_sfc(s0, Emax=Emax),1)
+            
+            # Calculate B for b related to soil type.
+            beta = 2 * self.b + 4 
+
+            # Name temp variables for improved readability
+            sfc = self.sfc
+            nZr = self.nZr
+
+            # Define eta and m
+            # Don't need eta because no dependence on climate
+            eta = Emax / nZr 
+            m =  self.Ks / (nZr * ( exp( beta*(1 - sfc) ) - 1 ))  
+           
+            L = (1 / beta * ln( 
+                (eta - m + m * exp(beta*(s0 - sfc)) * exp( beta * (eta - m ) * t ) 
+                - m * exp( beta * (s0 - sfc) ) )
+                / (eta - m ) ) )
+            if units=='mm/day':
+                return L * nZr
+            else:
+                # Assumes if units aren't mm/day we want units of saturation/day
+                return L
+        else:
+            return 0
+
 
 
 if __name__ == "__main__":
