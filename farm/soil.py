@@ -362,7 +362,7 @@ class Soil():
             # TODO: Remove Emax from calc_t_sfc
 
 
-    def calc_L(self, s0, units='mm/day'):
+    def calc_L(self, s0, Emax=0, units='mm/day'):
         """ Calculates daily leakage loss as a function of initial soil moisture in mm/day
 
         Usage: calc_L(s0, Emax=0, units)
@@ -385,6 +385,8 @@ class Soil():
             - We use Lmax (s0-sfc) as an upper bound on the value of L that is returned.
             
         """
+        t=1 # All our calculations assume one day of leakage
+
         self._check_nZr()
         Lmax = s0 - self.sfc # This is the largest amount of Leakage possible.  
         if Lmax > 0:
@@ -400,13 +402,12 @@ class Soil():
 
             # Define eta and m
             # Don't need eta because no dependence on climate
-            eta = Emax / nZr 
             m =  self.Ks / (nZr * ( exp( beta*(1 - sfc) ) - 1 ))  
            
             L = (1 / beta * ln( 
-                (eta - m + m * exp(beta*(s0 - sfc)) * exp( beta * (eta - m ) * t ) 
+                ( - m + m * exp(beta*(s0 - sfc)) * exp( beta * ( - m ) * t ) 
                 - m * exp( beta * (s0 - sfc) ) )
-                / (eta - m ) ) )
+                / ( - m ) ) )
             L = min(L,Lmax) # Don't return a value larger than Lmax
             if units=='mm/day':
                 return L * nZr
