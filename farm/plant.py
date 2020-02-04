@@ -145,3 +145,17 @@ class Crop(Plant):
             else:
                 return 0
 
+    def calc_stress(self, s, q=2):
+        """ Add docs
+
+
+        """
+        if s < self.sw:
+            stress = 1
+        elif s >= self.s_star:
+            stress = 0
+        else:
+            stress = ((self.s_star - s)/(self.s_star - self.sw))**q
+        return stress
+
+

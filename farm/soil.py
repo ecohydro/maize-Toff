@@ -362,10 +362,10 @@ class Soil():
             # TODO: Remove Emax from calc_t_sfc
 
 
-    def calc_L(self, s0, Emax=0, units='mm/day'):
+    def calc_L(self, s0, units='mm/day'):
         """ Calculates daily leakage loss as a function of initial soil moisture in mm/day
 
-        Usage: calc_L(s0, Emax=0, units)
+        Usage: calc_L(s0, units)
 
             s0 = initial soil moisture [0-1]
             units = units to return leakage in

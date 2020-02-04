@@ -59,6 +59,7 @@ class CropModel():
         self.ET_max = zeros(self.n_days)
         self.T_max = zeros(self.n_days)
         self.kc = zeros(self.n_days)
+        self.stress = zeros(self.n_days)
 
         # Set initial conditions:
         self.s[0] = 0.3     # relative soil moisture, [0-1]
@@ -74,12 +75,13 @@ class CropModel():
                 # TODO: Edit Crop class to make this dynamic.
                 self.kc[t] = self.crop.calc_kc(t)
                 self.LAI[t] = self.crop.calc_LAI(self.kc[t])
+                self.stress[t] = self.crop.calc_stress(self.s[t])
 
                 # 2. Calculate ET terms
                 self.T[t] = self.crop.calc_T(self.s[t],LAI=self.LAI[t])   # mm/day
                 self.E[t] = self.climate.calc_E(self.s[t], LAI = self.LAI[t], sh = self.soil.sh)
                 self.ET[t] = self.T[t] + self.E[t]
-                
+
                 # 1. Update Soil Moisture Water Balance (Part 1)
 
                 """ Note:
@@ -146,6 +148,7 @@ class CropModel():
         return DataFrame({ 
             'kc':self.kc,
             'LAI':self.LAI,
+            'stress':self.stress,
             'R':self.R,
             's':self.s,
             'E':self.E,
