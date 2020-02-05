@@ -146,9 +146,15 @@ class Crop(Plant):
                 return 0
 
     def calc_stress(self, s, q=2):
-        """ Add docs
+        """ Calculates static water stress.
 
+        Usage: calc_stress(s, q=2)
 
+            s = relative soil moisture [0-1]
+            q = 2
+
+        Note: The value of q changes based on plant species or soil type. 
+        See equation 4.13, p.101 in Rodriguez-Iturbe & Porporato (2004)
         """
         if s < self.sw:
             stress = 1
