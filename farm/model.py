@@ -60,15 +60,15 @@ class CropModel():
         self.T_max = zeros(self.n_days)
         self.kc = zeros(self.n_days)
         self.stress = zeros(self.n_days)
-
+        
+    def run(self, s0=0.3):
         # Set initial conditions:
-        self.s[0] = 0.3     # relative soil moisture, [0-1]
+        self.s[0] = s0     # relative soil moisture, [0-1]
         _s = self.s[0]      # intermediate soil moisture used during
                             # model time step calculations.
         _dsdt = 0           # intermediate soil moisture change used
                             # during model time step calculations.
-        
-    def run(self):
+
         for t in range(self.n_days):
             try:
                 # 0. Update the crop coefficient
