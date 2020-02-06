@@ -156,5 +156,4 @@ class CropModel():
             'T':self.T,
             'L':self.L,
             'dsdt':self.dsdt,
-
         })
