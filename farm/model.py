@@ -15,6 +15,7 @@ Contact:        nkrell@ucsb.edu
 #%% Define the CropModel Class
 from pandas import DataFrame
 from numpy import zeros
+import logging
         
 class CropModel():
     """ Defines an ecohydrological model class for use with crops.
@@ -96,6 +97,7 @@ class CropModel():
                 Therefore, we first see how Rainfall and ET affect s, and update a
                 temporary s value, _s, with the temporary dsdt value, _dsdt.
 
+
                 _dsdt = R(t) - E(s,t)
                 _s = s(t) + _dsdt
 
@@ -141,7 +143,10 @@ class CropModel():
                 # )
             except IndexError:
                 #print(f"DONE. At end of simulation, timestep {t}")
-                print("done")
+                logging.basicConfig()
+                logger = logging.getLogger(__name__)
+                logger.info('logging is easier than I was expecting')
+                #print("done")
                 break
     
     def output(self):
