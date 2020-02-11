@@ -3,12 +3,13 @@ Repo for modeling analysis of maize yield variability and tradeoffs between yiel
 
 ## Research questions
 1. What are the tradeoffs between yield (i.e. cultivar or variety selection), planting date, and crop failure?
-2. To what extent does temperature and precipitation variability drive variability in crop production?
 
 ## Set-up
+Create fork of maize-Toff and git clone to local machine.
+
 1. ```cd maize-Toff```
 2. ```conda env create -f environment.yml -n maize-Toff```
-3. ```conda activate maize```
+3. ```conda activate maize-Toff```
 4. ```jupyter notebook```
 
 Note: To update dependecies in an existing environment, use `conda env update --file environment.yml` after step four.
