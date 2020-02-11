@@ -5,7 +5,7 @@ Description:    Ecohydro model to track evaporation and transpiration
 
 URL:            https://github.com/ecohydro/maize-Toff
 
-Requires:       pandas; matlotlib; numpy; math
+Requires:       pandas; matlotlib; numpy; math; logging
 
 AUTHOR:         Natasha Krell & Kelly Caylor
 ORGANIZATION:   U.C. Santa Barbara
@@ -16,6 +16,8 @@ Contact:        nkrell@ucsb.edu
 from pandas import DataFrame
 from numpy import zeros
 import logging
+logging.basicConfig()
+logger = logging.getLogger(__name__)
         
 class CropModel():
     """ Defines an ecohydrological model class for use with crops.
@@ -143,10 +145,7 @@ class CropModel():
                 # )
             except IndexError:
                 #print(f"DONE. At end of simulation, timestep {t}")
-                logging.basicConfig()
-                logger = logging.getLogger(__name__)
                 logger.info('logging is easier than I was expecting')
-                #print("done")
                 break
     
     def output(self):
