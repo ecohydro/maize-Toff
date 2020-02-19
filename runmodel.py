@@ -10,7 +10,6 @@ from farm import Soil
 from farm import Crop
 from farm import CropModel
 
-
 #%% Initialize Climate
 climate = Climate()
 

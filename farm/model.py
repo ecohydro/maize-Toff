@@ -31,8 +31,11 @@ class CropModel():
         )
 
     """
-    def __init__(self, soil=None,climate=None,crop=None,*args):
-        
+    def __init__(self, soil=None, climate=None, crop=None, planting_date=1, *args):
+        """
+        TODO; Docstrings and what not here.
+
+        """
         self.soil = soil
         self.crop = crop
         self.climate = climate
@@ -64,6 +67,10 @@ class CropModel():
         self.kc = zeros(self.n_days)
         self.stress = zeros(self.n_days)
         
+        # Initialize dos (time into plant's growing season) to zero.
+        dos = 0  # day of season. Starts as zero, increases after planting date.
+        planted = False # flag to determine if the season has started.
+
     def run(self, s0=0.3):
         # Set initial conditions:
         self.s[0] = s0     # relative soil moisture, [0-1]
@@ -74,10 +81,14 @@ class CropModel():
 
         for t in range(self.n_days):
             try:
+                # Determine the day of season.
+                if climate.doy[t] == planting_date:
+                    planted = True
+                if planted == True:
+                    dos = dos + 1 # t_seas init as zero
                 # 0. Update the crop coefficient
-                # TODO: Edit Crop class to make this dynamic.
-                self.kc[t] = self.crop.calc_kc(t)
-                self.LAI[t] = self.crop.calc_LAI(self.kc[t])
+                self.kc[t] = self.crop.calc_kc(dos)
+                self.LAI[t] = self.crop.calc_LAI(self.kc[dos])
                 self.stress[t] = self.crop.calc_stress(self.s[t])
 
                 # 2. Calculate ET terms

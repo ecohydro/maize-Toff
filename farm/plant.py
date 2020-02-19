@@ -48,6 +48,7 @@ class Crop(Plant):
         self.T_max = T_max        # Maximum crop water use [mm/day]
         super(Crop, self).__init__(*args, **kwargs)
 
+    # TODO: All kc stuff should be a property of the crop with assignment during initialization.
     def calc_kc(self, day_of_season, t_seas = 180, f1 = 0.2, f2 = 0.5, f3 = 0.75, EoS = 1.0, kc_ini = 0.30, kc_max = 1.2, kc_EoS = 0.6):
         """ Calculates crop coefficient that varies throughout the season 
         
