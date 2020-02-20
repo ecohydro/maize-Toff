@@ -42,50 +42,51 @@ class Crop(Plant):
         'T_max':4.0         # Max Crop Water Use [mm/day]
 
     """
-    def __init__(self, kc_max=1.2, LAI_max=3.0, T_max=4, *args,**kwargs):
-        self.kc_max = kc_max     # Maximum crop coefficient [0-1]
+    def __init__(self, kc_max=1.2, LAI_max=3.0, T_max=4, lgp = 180, f1 = 0.2, f2 = 0.5, f3 = 0.75, 
+                 EoS = 1.0, kc_ini = 0.30, kc_EoS = 0.6,*args,**kwargs):
+
+        self.kc_max = kc_max      # Maximum crop coefficient; Kc at Reproductive Stage [0-1]
         self.LAI_max = LAI_max    # Maximum crop leaf area index [m^2/m^2]
         self.T_max = T_max        # Maximum crop water use [mm/day]
+        self.lgp = lgp            # Length of growing period [days]
+        self.f1 = f1              # Fraction of Season from Initial to Vegetative
+        self.f2 = f2              # Fraction of Season from Initial to Reproductive
+        self.f3 = f3              # Fraction of Season from Initial to Ripening
+        self.EoS = EoS            # Fraction of Season at End
+        self.kc_ini = kc_ini      # Kc at Initial Stage
+        self.kc_EoS = kc_EoS      # Kc at End of Season
         super(Crop, self).__init__(*args, **kwargs)
 
-    # TODO: All kc stuff should be a property of the crop with assignment during initialization.
-    def calc_kc(self, day_of_season, t_seas = 180, f1 = 0.2, f2 = 0.5, f3 = 0.75, EoS = 1.0, kc_ini = 0.30, kc_max = 1.2, kc_EoS = 0.6):
+    def calc_kc(self, day_of_season=0):
         """ Calculates crop coefficient that varies throughout the season 
         
-        Usage: calc_kc(self, day_of_season, t_seas = 120, f1 = 0.2, f2 = 0.5, f3 = 0.75, EoS = 1.0, kc_ini = 0.30, kc_max = 1.2, kc_EoS = 0.6)
-            Note: t must be a single-dimension array
-            day_of_season = user input # Start date [day]
-            t_seas = 120    # Length of growing season [days]
-            f1 = 0.2        # Fraction of Season from Initial to Vegetative
-            f2 = 0.5        # Fraction of Season from Initial to Reproductive
-            f3 = 0.75       # Fraction of Season from Initial to Ripening
-            EoS = 1.0       # Fraction of Season at End
+        Usage: calc_kc(self, day_of_season)
+            
+            day_of_season = 0 # Start date [day]
 
-            kc_ini =        # Kc at Initial Stage
-            kc_max =        # Kc at Reproductive Stage
-            kc_EoS =        # Kc at End of Season
+        Note: t must be a single-dimension array. day_of_season is when the plant starts
+        to grow and is hard coded to zero because python is zero-indexed.
+        Kc values come from Table 11. Lengths of crop development stages for 
+        maize (grain) in East Africa (altitude), Chapter 6 in FAO (1998).
 
         """
         if not day_of_season >= 0:
             raise ValueError ("day_of_season must be >= 0")
-        if day_of_season <= t_seas*f1:
-            return kc_ini
-        elif day_of_season < t_seas*f2:
-            return ((kc_max-kc_ini)/(f2*t_seas-f1*t_seas))*(day_of_season-f1*t_seas)+kc_ini
-        elif day_of_season <= t_seas*f3:
-            return kc_max
-        elif day_of_season < t_seas*EoS:
-            return kc_ini+((day_of_season-EoS*t_seas)/(f3*t_seas-EoS*t_seas))*kc_EoS+kc_ini
+        if day_of_season <= self.lgp*self.f1:
+            return self.kc_ini
+        elif day_of_season < self.lgp*self.f2:
+            return ((self.kc_max-self.kc_ini)/(self.f2*self.lgp-self.f1*self.lgp))*(day_of_season-self.f1*self.lgp)+self.kc_ini
+        elif day_of_season <= self.lgp*self.f3:
+            return self.kc_max
+        elif day_of_season < self.lgp*self.EoS:
+            return self.kc_ini+((day_of_season-self.EoS*self.lgp)/(self.f3*self.lgp-self.EoS*self.lgp))*self.kc_EoS+self.kc_ini
         else:
-            return kc_EoS
-            #return self.kc_max # previously this was the last line of the function
-
+            return self.kc_EoS
 
     def calc_T_max(self, kc):
         """ Calculates max Transpiration variable.
         
         Usage: calc_T_max(kc)
-
 
         T = kc * T_max
             
