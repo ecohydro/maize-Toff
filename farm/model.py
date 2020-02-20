@@ -27,19 +27,28 @@ class CropModel():
         model = CropModel(
             soil=soil,
             climate=climate,
-            crop=crop
+            crop=crop,
+            planting_date=100
         )
 
+    Default values:
+        planting_date = 100 # Date Planted [Julian Day]
+
     """
-    def __init__(self, soil=None, climate=None, crop=None, planting_date=1, *args):
+    def __init__(self, soil=None, climate=None, crop=None, planting_date=100, *args):
         """
-        TODO; Docstrings and what not here.
+        Initializes a crop model object.
+
+        The init function requires the user to input crop, soil, and climate objects.
+        It has a default planting date of 100, which is early April; a typical 
+        value for the long rains cropping season in Kenya (Ray et al. 2015)
 
         """
         self.soil = soil
         self.crop = crop
         self.climate = climate
         self.n_days = len(self.climate.rainfall)
+        self.planting_date = planting_date 
 
         try:
             # Set the nZr using the soil's function.
@@ -66,10 +75,6 @@ class CropModel():
         self.T_max = zeros(self.n_days)
         self.kc = zeros(self.n_days)
         self.stress = zeros(self.n_days)
-        
-        # Initialize dos (time into plant's growing season) to zero.
-        dos = 0  # day of season. Starts as zero, increases after planting date.
-        planted = False # flag to determine if the season has started.
 
     def run(self, s0=0.3):
         # Set initial conditions:
@@ -81,8 +86,12 @@ class CropModel():
 
         for t in range(self.n_days):
             try:
+                # Initialize dos (time into plant's growing season) to zero.
+                dos = 0  # day of season. Starts as zero, increases after planting date. 
+                planted = False # flag to determine if the season has started.
+
                 # Determine the day of season.
-                if climate.doy[t] == planting_date:
+                if self.climate.doy[t] == self.planting_date: 
                     planted = True
                 if planted == True:
                     dos = dos + 1 # t_seas init as zero
