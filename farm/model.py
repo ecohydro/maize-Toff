@@ -78,7 +78,7 @@ class CropModel():
 
     def run(self, s0=0.3):
         # Set initial conditions:
-        self.s[0] = s0     # relative soil moisture, [0-1]
+        self.s[0] = s0      # relative soil moisture, [0-1]
         _s = self.s[0]      # intermediate soil moisture used during
                             # model time step calculations.
         _dsdt = 0           # intermediate soil moisture change used
@@ -180,4 +180,6 @@ class CropModel():
             'T':self.T,
             'L':self.L,
             'dsdt':self.dsdt,
+            'doy':self.climate.doy,
+            'PD':self.planting_date
         })
