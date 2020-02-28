@@ -1,5 +1,4 @@
-#%% SCRIPT TO RUN THE MODEL
-#
+# %% SCRIPT TO RUN THE MODEL
 # Import matplotlib to generate figures
 import matplotlib.pyplot as plt
 
@@ -10,27 +9,27 @@ from farm import Soil
 from farm import Crop
 from farm import CropModel
 
-#%% Initialize Climate
+# %% Initialize Climate
 climate = Climate()
 
-#%% Initialize Soil
+# %% Initialize Soil
 soil = Soil(texture='loam')
 
-#%% Initialize Plant
+# %% Initialize Plant
 crop = Crop(soil=soil)
 
 # Finally, now that the plant is defined, we need
 # to set the soil.nZr property:
 soil.set_nZr(crop)
 
-#%% Initialize the Model
+# %% Initialize the Model
 model = CropModel(crop=crop, climate=climate, soil=soil)
 
-#%% Run the Model
+# %% Run the Model
 model.run()
 
-#%% Assign Model Output
+# %% Assign Model Output
 output = model.output()
 
-#%% Generate figures
+# %% Generate figures
 output['ET'].plot()
