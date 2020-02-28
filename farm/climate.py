@@ -6,8 +6,6 @@ from numpy.random import exponential, uniform
 default_climate = {
     'alpha_r': [10.0] * 12,
     'lambda_r': [0.25] * 12,
-    'doy_start': 1,
-    't_sim': 180,
     'ET_max': 6.5
 }
 
@@ -17,16 +15,16 @@ datetimes = np.arange(
     ).astype(datetime)
 month_value_by_day = np.array([datetime.month for datetime in datetimes])
 
+# Should we rename this?
 class Climate():
 
-    """ Creates a daily rainfall timeseries for use in ecohydrological modeling
+    """ Creates a years worth of daily rainfall timeseries for use in ecohydrological modeling
 
-    Usage: climate = Climate(alpha_r, lambda_r, t_seas, ET_max)
+    Usage: climate = Climate(alpha_r, lambda_r, ET_max)
 
         alpha_r = average storm depth [mm]
         lambda_r = storm frequency [day^-1]
-        t_sim = length of simulation [days]
-
+      
     Default values:
         alpha_r = 10
         lambda_r = 0.25
@@ -37,37 +35,25 @@ class Climate():
     or have length of tseas (discrete rainfall probabilities each day.
 
     """
-    def __init__(self, climate_parameters=default_climate, **kwargs):
+    def __init__(self, alpha_r=[10.0] * 12, lambda_r=[0.25] * 12, ET_max=6.5, **kwargs):
         
        
         # Unpack the dictionary:
-        self.t_sim = climate_parameters['t_sim'] 
-        self.doy_start = climate_parameters['doy_start']
-        self.ET_max = climate_parameters['ET_max']
-       
-        # Force doy to be in [1,365]:
-        doy = np.arange(self.doy_start, self.doy_start+self.t_sim)
-        while (doy - 365 > 0).any() == True:
-            doy = doy - 365 * ((doy - 365) > 0)
-        self.doy = doy
-
-        # Determine daily values of lambda and alpha:
-        lambda_r = climate_parameters['lambda_r']
-        alpha_r = climate_parameters['alpha_r']
+        self.ET_max = ET_max
+        
         # Check to ensure that lambda_r is either:
-        # 1. a scalar, which means we have a constant climate
-        # 2. has length of t_sim, which means we have specified daily values.
+        # 1. a scalar, which means we have constant climate parameters
+        # 2. has length of 365, which means we have specified daily values.
         # 3. has length of 12, which means we have specified monthly values.
         if isinstance(lambda_r, (float, int)):
             if isinstance(alpha_r, (float, int)):
                 # We have a constant value:
-                lambda_r_list = [lambda_r] * self.t_sim
-                alpha_r_list = [alpha_r] * self.t_sim
+                lambda_r_list = [lambda_r] * 365
+                alpha_r_list = [alpha_r] * 365
             else:
                 raise ValueError("lambda_r values and alpha_r values must be same length")
-        elif len(lambda_r) == self.t_sim:
-            if len(alpha_r) == self.t_sim:
-                # We have daily values:
+        elif len(lambda_r) == 365:
+            if len(alpha_r) == 365:
                 lambda_r_list = lambda_r
                 alpha_r_list = alpha_r
             else:
@@ -75,14 +61,12 @@ class Climate():
         elif len(lambda_r) == 12:
             if len(alpha_r) == 12:
                 # We have monthly values (remember that python is zero-indexed)
-                lambda_all_year = np.array(
+                lambda_r_list = np.array(
                     [lambda_r[month_value-1] for month_value in month_value_by_day]
                     )
-                alpha_all_year = np.array(
+                alpha_r_list = np.array(
                     [alpha_r[month_value-1] for month_value in month_value_by_day]
                     )
-                lambda_r_list = lambda_all_year[self.doy-1]
-                alpha_r_list = alpha_all_year[self.doy-1]
             else:
                 raise ValueError("lambda_r values and alpha_r values must be same length")
         else:
@@ -95,7 +79,7 @@ class Climate():
         self.lambda_r = lambda_r_list
         
         # Use the static method, generate, to create this instance's rainfall.
-        self.rainfall = self.generate(self.alpha_r, self.lambda_r, self.t_sim, self.doy_start)
+        self.rainfall = self.generate(self.alpha_r, self.lambda_r)
 
         # Assign any other passed parameters (e.g. site, etc...)
         for key, value in kwargs.items():
@@ -125,7 +109,7 @@ class Climate():
             return 0
 
     @staticmethod # Static methods can be called without instancing the class.
-    def generate(alpha_r, lambda_r, t_sim, doy_start):
+    def generate(alpha_r, lambda_r, t_sim=365, doy_start=1):
         """ Makes a time series of rainfall based on parameters
 
         Usage:
@@ -139,8 +123,12 @@ class Climate():
         or have length of tseas (discrete rainfall probabilities each day.
 
         """
+        # Force doy to be in [1,365]:
+        doys = np.arange(doy_start, doy_start + t_sim)
+        while (doys - 365 > 0).any() == True:
+            doys = doys - 365 * ((doys - 365) > 0)
 
-        amounts = [exponential(scale=alpha_value, size=1)[0] for alpha_value in alpha_r]
-        rain_days = (uniform(low=0, high=1, size=t_sim) <= lambda_r).astype(int)
-        return amounts * rain_days
+        amounts = [exponential(scale=alpha_r[doy-1], size=1)[0] for doy in doys]
+        rain_days = [(uniform(low=0, high=1, size=1) <= lambda_r[doy-1] ).astype(int) for doy in doys]
+        return np.multiply(amounts, [v[0] for v in rain_days])
 
