@@ -15,6 +15,8 @@ Contact:        nkrell@ucsb.edu
 #%% Define the CropModel Class
 from pandas import DataFrame
 from numpy import zeros
+import numpy as np
+
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -57,14 +59,18 @@ class CropModel():
             # Set maximum soil water content (mm):
             self.nZr = self.soil.n * self.crop.Zr # [mm]  
 
+
+    def pre_allocate(self):
+
         # Pre-allocate arrays
-        self.R = self.climate.rainfall  # [mm/day]
+        self.R = zeros(self.n_days)     # Will add in rainfall later
         self.s = zeros(self.n_days)     # [0-1]
         self.ET = zeros(self.n_days)    # [mm/day]
         self.E = zeros(self.n_days)     # [mm/day]
         self.T = zeros(self.n_days)     # [mm/day]
         self.L = zeros(self.n_days)     # [mm/day]
         self.Q = zeros(self.n_days)     # [mm/day]
+        self.dos = zeros(self.n_days)   # integer
 
         # Note: We calculate dsdt in mm/day to make it easier 
         # to handle water balance with regards to other terms.
@@ -76,26 +82,76 @@ class CropModel():
         self.kc = zeros(self.n_days)
         self.stress = zeros(self.n_days)
 
-    def run(self, s0=0.3):
+    def run(self,
+            s0=0.3,
+            planting_date=100,
+            t_before=21,
+            t_after=7):
+        """ Runs the ecohydro crop model.
+
+            Inputs:
+                planting_date: This is the julian day of 
+                    year that the crop is planted.
+
+                s0: This is the initial soil moisture value 
+                    for the simulation
+
+                t_before: This is the time in days before planting date
+                    that we start the model.
+
+                t_after: This is the duration after harvest date that we
+                    run the model.
+
+            We initialize the model run to start on DOY planting_date - t_before.
+            The model then runs for a total of t_before + crop.lgp + t_after days
+
+        """
+        doy_start = planting_date - t_before
+        # Make sure we don't back into the prior year.
+        if doy_start <= 0:
+            doy_start = 365 + doy_start
+
+        doy_end = planting_date + self.crop.lgp + t_after
+
+        # Force doy to be in [1,365]:
+        doy = np.arange(doy_start, doy_end)
+        while (doy - 365 > 0).any() == True:
+            doy = doy - 365 * ((doy - 365) > 0)
+
+        self.n_days = t_before + self.crop.lgp + t_after
+        self.pre_allocate()
+
+        for t in range(self.n_days):
+            self.R[t] = self.climate.rainfall[doy[t]-1]
+
+        self.doy = doy
         # Set initial conditions:
+        # Write this! TODO.
+        #
+        # self.s[0] = self.average_soil_moisture(doy_start)
+        #
+        # self.s[0] = self.average_soil_moisture(crop=self.crop, soil=self.soil.... etc... )
+        #
+        # Once function is created, we can implement a cache.
+        #
         self.s[0] = s0     # relative soil moisture, [0-1]
         _s = self.s[0]      # intermediate soil moisture used during
                             # model time step calculations.
         _dsdt = 0           # intermediate soil moisture change used
                             # during model time step calculations.
+        
+        dos = 0   # initialize day of season to zero.
+        planted = False # flag to determine if the season has started.
 
         for t in range(self.n_days):
-            try:
-                # Initialize dos (time into plant's growing season) to zero.
-                dos = 0  # day of season. Starts as zero, increases after planting date. 
-                planted = False # flag to determine if the season has started.
-
+            try:        
                 # Determine the day of season.
-                if self.climate.doy[t] == self.planting_date: 
+                if self.doy[t] == self.planting_date: 
                     planted = True
                 if planted == True:
                     dos = dos + 1 # t_seas init as zero
-                # 0. Update the crop coefficient
+                # 0. Update the crop coefficient and day of season
+                self.dos[t] = dos
                 self.kc[t] = self.crop.calc_kc(dos)
                 self.LAI[t] = self.crop.calc_LAI(self.kc[dos])
                 self.stress[t] = self.crop.calc_stress(self.s[t])
@@ -180,4 +236,6 @@ class CropModel():
             'T':self.T,
             'L':self.L,
             'dsdt':self.dsdt,
+            'dos':self.dos,
+            'doy':self.doy
         })
