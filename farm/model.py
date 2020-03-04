@@ -37,7 +37,7 @@ class CropModel():
         planting_date = 100 # Date Planted [Julian Day]
 
     """
-    def __init__(self, soil=None, climate=None, crop=None, planting_date=100, *args):
+    def __init__(self, soil=None, climate=None, crop=None, *args):
         """
         Initializes a crop model object.
 
@@ -50,8 +50,7 @@ class CropModel():
         self.crop = crop
         self.climate = climate
         self.n_days = len(self.climate.rainfall)
-        self.planting_date = planting_date 
-
+        
         try:
             # Set the nZr using the soil's function.
             self.nZr = soil.set_nZr(crop)
@@ -60,7 +59,7 @@ class CropModel():
             self.nZr = self.soil.n * self.crop.Zr # [mm]  
 
 
-    def pre_allocate(self):
+    def pre_allocate(self, n_days=None):
 
         # Pre-allocate arrays
         self.R = zeros(self.n_days)     # Will add in rainfall later
@@ -83,6 +82,7 @@ class CropModel():
         self.stress = zeros(self.n_days)
 
     def run(self,
+            do_output=False,
             s0=0.3,
             planting_date=100,
             t_before=21,
@@ -106,25 +106,29 @@ class CropModel():
             The model then runs for a total of t_before + crop.lgp + t_after days
 
         """
-        doy_start = planting_date - t_before
-        # Make sure we don't back into the prior year.
-        if doy_start <= 0:
-            doy_start = 365 + doy_start
+        self.planting_date = planting_date
+        self.n_days = t_before + self.crop.lgp + t_after
+        self.pre_allocate()
 
-        doy_end = planting_date + self.crop.lgp + t_after
+        self.doy_start = self.planting_date - t_before
+        # Make sure we don't back into the prior year.
+        if self.doy_start <= 0:
+            self.doy_start = 365 + self.doy_start
+
+        self.dos_end = self.planting_date + self.crop.lgp + t_after
 
         # Force doy to be in [1,365]:
-        doy = np.arange(doy_start, doy_end)
+        doy = np.arange(self.doy_start, self.doy_start + self.n_days)
         while (doy - 365 > 0).any() == True:
             doy = doy - 365 * ((doy - 365) > 0)
 
-        self.n_days = t_before + self.crop.lgp + t_after
-        self.pre_allocate()
+        self.doy_end = doy[-1:] # last doy of year of simulation.
 
         for t in range(self.n_days):
             self.R[t] = self.climate.rainfall[doy[t]-1]
 
         self.doy = doy
+
         # Set initial conditions:
         # Write this! TODO.
         #
@@ -134,6 +138,7 @@ class CropModel():
         #
         # Once function is created, we can implement a cache.
         #
+
         self.s[0] = s0     # relative soil moisture, [0-1]
         _s = self.s[0]      # intermediate soil moisture used during
                             # model time step calculations.
@@ -223,7 +228,10 @@ class CropModel():
                 #print(f"DONE. At end of simulation, timestep {t}")
                 logger.info('logging is easier than I was expecting')
                 break
-    
+
+            if do_output:
+                return self.output()
+
     def output(self):
         return DataFrame({ 
             'kc':self.kc,
