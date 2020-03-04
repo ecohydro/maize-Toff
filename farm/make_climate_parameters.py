@@ -26,6 +26,68 @@ import numpy as np
 from datetime import datetime
 from dateutil.relativedelta import *
 
+def check_exponential(data):
+
+	""" Defines function that fits daily rainfall amounts to an exponential distribution and returns pdf 
+		and r2. The r2 should be above 0.9 to be an exponential.
+
+		Usage:
+
+			check_exponential(data):
+
+				returns r2, pdf
+
+		How it works:
+		- Step 1: To fit the distribution, we use functions from python's suite of numerical analysis, scipy.
+		The scipy.stats module has a large suite of distribution functions pre-defined, which we can use to 
+		develop a fit for our data. The distribution we are interested in is the exponential distribution, 
+		which is called expon in the stats module.
+
+		- Step 2-4: Calculate fitted PDF and error with fit in distribution. To test the fit of our distribution, 
+		we can compare the empirical histogram to that predicted by our model. We first use our `data` to generate 
+		the empirical histogram. In this example, we break the data into `30` bins, and we generate a histrogram 
+		of `density` rather than counts. This allows for an easier comparison between our empirical data and the 
+		fitted probability distribution function. 
+		
+		Here are the steps:
+
+		1. Generate a histogram, from the `data`. Save the bin locations in `x` and the density of values in `y`
+		2. Shift the `x` bin locations generated from the histogram to the center of bins.
+		3. Calculate the value of the fitted `pdf(x)` for each of the bins in `x`.
+		4. Determine the residual sum of the squares, $SS_{error}$, and total sum of squares, $SS_{yy}$, according 
+		to the equations in rainfall-variability.ipynb.
+	"""
+
+	# Step 1. Fit the distribution.
+	distribution = st.expon
+	params = distribution.fit(data, loc=0) # Force the distribution to be built off of zero
+
+	arg = params[:-2]
+	loc = params[-2]
+	scale = params[-1]
+
+	y, x = np.histogram(data, bins=30, density=True)
+
+	# Step 2. Shift the x bin locations to the center of bins.
+	x = (x + np.roll(x, -1))[:-1] / 2.0
+
+	# Step 3. Calculate the values of pdx(x) for all x.
+	pdf = distribution.pdf(x, loc=loc, scale=scale, *arg)
+
+	# Step 4. Determine the residual and total sum of the squares.
+	ss_error = np.sum(np.power(y - pdf, 2.0))
+	ss_yy = np.sum(np.power(y - y.mean(), 2.0))
+
+	r_2 = 1 - ( ss_error / ss_yy )
+
+	if r_2 < 0.9:
+		print("WARNING. r2 for {station} is {r_2}".format(
+			station=station,
+			r_2=r_2))
+
+	return r_2, pdf
+
+
 def make_climate_parameters(station='OL JOGI FARM'):
 
 	# Prepare the CETRAD dataset.
@@ -74,32 +136,8 @@ def make_climate_parameters(station='OL JOGI FARM'):
 	# Find just the rainfall amounts on days that it rained.
 	data = rainfall.loc[rainfall[station] > 0][station]
 	
-	### NOTE: PULL THIS OUT AS A FUNCTION THAT RETURNS PARAMETERS AND r2
-	# Fit the daily rainfall amounts to an exponential distribution
-	distribution = st.expon
-	params = distribution.fit(data, loc=0) # Force the distribution to be built off of zero
-
-	arg = params[:-2]
-	loc = params[-2]
-	scale = params[-1]
-
-	y, x = np.histogram(data, bins=30, density=True)
-
-	# Step 2. Shift the x bin locations to the center of bins.
-	x = (x + np.roll(x, -1))[:-1] / 2.0
-
-	# Step 3. Calculate the values of pdx(x) for all x.
-	pdf = distribution.pdf(x, loc=loc, scale=scale, *arg)
-
-	# Step 4. Determine the residual and total sum of the squares.
-	ss_error = np.sum(np.power(y - pdf, 2.0))
-	ss_yy = np.sum(np.power(y - y.mean(), 2.0))
-
-	r_2 = 1 - ( ss_error / ss_yy )
-	if r_2 < 0.9:
-		print("WARNING. r2 for {station} is {r_2}".format(
-			station=station,
-			r_2=r_2))
+	# Fit the daily rainfall amounts to an exponential distribution.
+	check_exponential(data)
 
 	# Determine the Monthly values of alpha and lambda from the station data:
 	lambda_by_month = (
@@ -116,7 +154,3 @@ def make_climate_parameters(station='OL JOGI FARM'):
 	
 
 	return climate['alpha_by_month'].to_list(), climate['lambda_by_month'].to_list()
-
-
-
-	
