@@ -1,4 +1,4 @@
-"""
+    """
 Name:           model.py
 Compatibility:  Python 3.7
 Description:    Ecohydro model to track evaporation and transpiration
@@ -79,7 +79,7 @@ class CropModel():
         self.ET_max = zeros(self.n_days)
         self.T_max = zeros(self.n_days)
         self.kc = zeros(self.n_days)
-        self.stress = zeros(self.n_days)
+        self.stress = zeros(self.n_days)        
 
     def run(self,
             do_output=False,
