@@ -166,14 +166,16 @@ def average_soil_moisture(model, n_sims=100, t_before=30, doy=None):
 	lambda_r = model.climate.lambda_r
 	climates = [Climate(alpha_r, lambda_r) for sim in np.arange(n_sims)]
     
-	model.crop.lgp = 0
+	# Create a temporary crop object with a 0 day length of growing period.
+	temp_crop = model.crop
+	temp_crop.lgp = 0
 
     # Get output from each simulataion using an implicit for loop.
-	models = [ CropModel(crop=model.crop,soil=model.soil,climate=climates[i]) for i in np.arange(n_sims) ]
+	# Use the temp crop object to create these models.
+	models = [ CropModel(crop=temp_crop,soil=model.soil,climate=climates[i]) for i in np.arange(n_sims) ]
 	
 	output = [ models[i].run(do_output=True, planting_date=doy+1, t_before=t_before, t_after=0) for i in np.arange(n_sims) ]
 
     # Extract the final value of soil moisture from each output.
 	values = pd.DataFrame([output[i]['s'][-1:] for i in np.arange(n_sims)])
 	return values.mean(), values.std()
-
