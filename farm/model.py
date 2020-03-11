@@ -1,4 +1,4 @@
-    """
+"""
 Name:           model.py
 Compatibility:  Python 3.7
 Description:    Ecohydro model to track evaporation and transpiration
