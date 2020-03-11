@@ -25,6 +25,9 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from dateutil.relativedelta import *
+import functools
+from .climate import Climate
+from .model import CropModel
 
 def check_exponential(data):
 
@@ -154,3 +157,23 @@ def make_climate_parameters(station='OL JOGI FARM'):
 	
 
 	return climate['alpha_by_month'].to_list(), climate['lambda_by_month'].to_list()
+
+
+@functools.lru_cache(maxsize=128)
+def average_soil_moisture(model, n_sims=100, t_before=30, doy=None):
+
+	alpha_r = model.climate.alpha_r
+	lambda_r = model.climate.lambda_r
+	climates = [Climate(alpha_r, lambda_r) for sim in np.arange(n_sims)]
+    
+	model.crop.lgp = 0
+
+    # Get output from each simulataion using an implicit for loop.
+	models = [ CropModel(crop=model.crop,soil=model.soil,climate=climates[i]) for i in np.arange(n_sims) ]
+	
+	output = [ models[i].run(do_output=True, planting_date=doy+1, t_before=t_before, t_after=0) for i in np.arange(n_sims) ]
+
+    # Extract the final value of soil moisture from each output.
+	values = pd.DataFrame([output[i]['s'][-1:] for i in np.arange(n_sims)])
+	return values.mean(), values.std()
+

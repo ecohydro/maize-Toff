@@ -16,6 +16,8 @@ Contact:        nkrell@ucsb.edu
 from pandas import DataFrame
 from numpy import zeros
 import numpy as np
+from .climate import Climate
+import functools
 
 import logging
 logging.basicConfig()
@@ -49,7 +51,7 @@ class CropModel():
         self.soil = soil
         self.crop = crop
         self.climate = climate
-        self.n_days = len(self.climate.rainfall)
+        #self.n_days = len(self.climate.rainfall)
         
         try:
             # Set the nZr using the soil's function.
@@ -128,16 +130,6 @@ class CropModel():
             self.R[t] = self.climate.rainfall[doy[t]-1]
 
         self.doy = doy
-
-        # Set initial conditions:
-        # Write this! TODO.
-        #
-        # self.s[0] = self.average_soil_moisture(doy_start)
-        #
-        # self.s[0] = self.average_soil_moisture(crop=self.crop, soil=self.soil.... etc... )
-        #
-        # Once function is created, we can implement a cache.
-        #
 
         self.s[0] = s0     # relative soil moisture, [0-1]
         _s = self.s[0]      # intermediate soil moisture used during
@@ -229,8 +221,8 @@ class CropModel():
                 logger.info('logging is easier than I was expecting')
                 break
 
-            if do_output:
-                return self.output()
+        if do_output:
+            return self.output()
 
     def output(self):
         return DataFrame({ 
