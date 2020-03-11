@@ -88,7 +88,8 @@ class CropModel():
             s0=0.3,
             planting_date=100,
             t_before=21,
-            t_after=7):
+            t_after=7,
+            lgp = 180):
         """ Runs the ecohydro crop model.
 
             Inputs:
@@ -108,16 +109,19 @@ class CropModel():
             The model then runs for a total of t_before + crop.lgp + t_after days
 
         """
+        self.lgp = lgp
+        self.t_before = t_before
+        self.t_after = t_after        
         self.planting_date = planting_date
-        self.n_days = t_before + self.crop.lgp + t_after
+        self.n_days = self.t_before + self.lgp + self.t_after
         self.pre_allocate()
 
-        self.doy_start = self.planting_date - t_before
+        self.doy_start = self.planting_date - self.t_before
         # Make sure we don't back into the prior year.
         if self.doy_start <= 0:
             self.doy_start = 365 + self.doy_start
 
-        self.dos_end = self.planting_date + self.crop.lgp + t_after
+        self.dos_end = self.planting_date + self.lgp + self.t_after
 
         # Force doy to be in [1,365]:
         doy = np.arange(self.doy_start, self.doy_start + self.n_days)
@@ -239,3 +243,7 @@ class CropModel():
             'dos':self.dos,
             'doy':self.doy
         })
+
+
+    def md(self):
+        return self.t_before, self.t_after, self.lgp, self.dos_end
