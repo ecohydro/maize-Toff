@@ -23,6 +23,7 @@
 import scipy.stats as st
 import pandas as pd
 import numpy as np
+import copy
 from datetime import datetime
 from dateutil.relativedelta import *
 import functools
@@ -167,7 +168,7 @@ def average_soil_moisture(model, n_sims=100, t_before=30, doy=None):
 	climates = [Climate(alpha_r, lambda_r) for sim in np.arange(n_sims)]
     
 	# Create a temporary crop object with a 0 day length of growing period.
-	temp_crop = model.crop
+	temp_crop = copy.copy(model.crop)
 	temp_crop.lgp = 0
 
     # Get output from each simulataion using an implicit for loop.
