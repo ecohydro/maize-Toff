@@ -161,7 +161,7 @@ def make_climate_parameters(station='OL JOGI FARM'):
 
 
 @functools.lru_cache(maxsize=128)
-def average_soil_moisture(model, n_sims=100, t_before=30, doy=None):
+def average_soil_moisture(model, n_sims=100, t_before=60, doy=None):
 
 	alpha_r = model.climate.alpha_r
 	lambda_r = model.climate.lambda_r
