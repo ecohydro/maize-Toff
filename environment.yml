@@ -6,3 +6,4 @@ dependencies:
   - scipy
   - matplotlib
   - seaborn
+  - proplot
