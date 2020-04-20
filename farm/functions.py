@@ -153,7 +153,7 @@ def make_climate_parameters(station='OL JOGI FARM'):
 
 	# MAKE THE CLIMATE PARAMETER DICT:
 	climate = pd.DataFrame(alpha_by_month)
-	climate = climate.rename(columns={'OL JOGI FARM': 'alpha_by_month'})
+	climate = climate.rename(columns={station: 'alpha_by_month'})
 	climate['lambda_by_month'] = lambda_by_month
 
 	return climate['alpha_by_month'].to_list(), climate['lambda_by_month'].to_list()
