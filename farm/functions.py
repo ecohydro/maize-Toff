@@ -179,3 +179,15 @@ def average_soil_moisture(model, n_sims=100, t_before=60, doy=None):
     # Extract the final value of soil moisture from each output.
 	values = pd.DataFrame([output[i]['s'][-1:] for i in np.arange(n_sims)])
 	return values.mean(), values.std()
+
+def calc_yield(stress=None, max_yield = 4680):
+    yield_kg_ha = -max_yield*stress + max_yield
+    
+    if stress > 1:
+        raise ValueError("static stress, {stress} is larger than 1".format(
+                stress=stress))
+    if stress < 0:
+        raise ValueError("static stress, {stress} is less than 0".format(
+                stress=stress))
+    
+    return yield_kg_ha
