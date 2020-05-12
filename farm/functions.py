@@ -21,6 +21,7 @@
   'SUGUROI ESTATE', 'TELEKI (MT KENYA)', 'TELESWANI (NRM)', 'THARUA FARM', 'TIMAU MARANIA', 'TRENCH FARM']
 """
 import scipy.stats as st
+from scipy.optimize import curve_fit
 import pandas as pd
 import numpy as np
 import copy
@@ -275,7 +276,7 @@ def power_law_fit(xdat,ydat, x_lab, y_lab, title):
     
     # Bottom plot
     axs[1].plot(residuals) #linewidth=.9
-    axs[1].format(title='Residuals', titleweight='bold',xlabel='Whatever X label',
+    axs[1].format(title='Residuals', titleweight='bold',xlabel='Simulation Number',
                  ylabel='Error') #, titleloc='ul
     axs[0].set_xlim(min(x)-3, max(x)+10)  
 
@@ -298,7 +299,8 @@ def polyfit(x, y, degree):
 
     return results, yhat, ybar
 
-def plot_polyfit(x=None, y=None,x_lab='Seasonal rainfall (mm)',y_lab='Yield (kg/ha)',title='Polynomial fit'):
+def plot_polyfit(x=None, y=None, degree=2, x_lab='Seasonal rainfall (mm)',y_lab='Yield (kg/ha)',title='Polynomial fit'):
+    # degree = degree of the fitting polynomial
     
     fig, ax = plt.subplots(figsize=(5,4))
     p = np.poly1d(np.polyfit(x, y, 3))
