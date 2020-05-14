@@ -1,4 +1,6 @@
-#%%
+#%% Plant Class Definition
+import numpy as np
+
 class Plant():
     """ Defines a plant class
 
@@ -56,6 +58,8 @@ class Crop(Plant):
         self.kc_ini = kc_ini      # Kc at Initial Stage
         self.kc_EoS = kc_EoS      # Kc at End of Season
         super(Crop, self).__init__(*args, **kwargs)
+
+        # TODO check that when you change the lgp in model initialization that the kc value changes
 
     def calc_kc(self, day_of_season=0):
         """ Calculates crop coefficient that varies throughout the season 
@@ -152,7 +156,7 @@ class Crop(Plant):
 
         Usage: calc_stress(s, q=2)
 
-            s = relative soil moisture [0-1]
+            s = relative saturation [0-1]
             q = 2
 
         Note: The value of q changes based on plant species or soil type. 
@@ -166,4 +170,58 @@ class Crop(Plant):
             stress = ((self.s_star - s)/(self.s_star - self.sw))**q
         return stress
 
+    def calc_dstress(self, s, stress, y_max=4260):
+        '''Calculates dyamic stress (theta) which is a measure of total water stress during the growing season
+        as proposed in Porporato et al. (2001). The last step calculates yield. 
+        
+        Usage: calc_dstress(s, stress):
 
+            s = relative saturation [0-1]
+            stress = static stress [0-1]
+
+        Default values:
+            mstr_memb = average static stress [0-1]
+            self.lgp = length of the growing season [days]
+            KPAR = fraction of growing season before crop fails [dim]
+            RPAR = effect of number of excursions below stress point [dim]
+
+        Returns:
+
+            dstr_memb = (mstr_memb * mcrs_memb) / (KPAR * self.lgp))**(ncrs_memb**-RPAR)
+            yield_kg_ha = y_max * (1 - dstr_memb)
+        
+        '''
+        # Step 0. Define variables
+        KPAR = 0.5
+        RPAR = 2
+        INVL_SIMU = 1 # TODO: Not sure what this is. Need to justify.
+
+        # Step 1. Calculate average static stress
+        if len(stress) > 0:
+            # Subset the growing period and get avg soil moisture
+            start = 21 
+            end = start + self.lgp
+            stress_subset = stress[start:end]
+            mstr_memb = np.mean(stress_subset)
+        else:
+            mstr_memb = 0.
+
+        # Step 2. Calculate threshold crossing parameters
+        indx_memb = np.where(s >= self.s_star)
+        ccrs_memb = np.diff(np.append(0, np.append(indx_memb, INVL_SIMU * self.lgp + 1))) - 1
+        ccrs_memb = ccrs_memb[ccrs_memb > 0]
+        ncrs_memb = len(ccrs_memb)  # dim
+        if ncrs_memb > 0:
+            mcrs_memb = np.mean(ccrs_memb) / INVL_SIMU # days
+        else:
+            mcrs_memb = 0.
+            
+        # Step 3. Calculate dynamic stress
+        dstr_memb = ((mstr_memb * mcrs_memb) / (KPAR * self.lgp))**(ncrs_memb**-RPAR)
+        if dstr_memb > 1.:
+            dstr_memb = 1.
+
+        # Step 4. Calculate yield
+        yield_kg_ha = y_max * (1 - dstr_memb)
+
+        return dstr_memb, yield_kg_ha
