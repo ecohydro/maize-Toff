@@ -8,7 +8,7 @@ class Plant():
     """
     def __init__(self,
         Zr=500,             # Rooting depth [mm]
-        T_max=4,            # Maximum transpiration [mm/day]
+        T_MAX=4,            # Maximum transpiration [mm/day]
         sw_MPa = -1.5,      # wilting point of plant in water potential [MPa]
         s_star_MPa = -0.05, # water potential of maximum transpiration [MPa], 
         soil=None          # a soil in which this plant will grow
@@ -21,7 +21,7 @@ class Plant():
         self.sw = soil.s(soil.theta(sw_MPa))
         self.s_star = soil.s(soil.theta(s_star_MPa)) 
 
-        self.T_max = T_max      # Should be over-written by any subclass.
+        self.T_MAX = T_MAX      # Should be over-written by any subclass.
         
     def calc_LAI(self):
         raise NotImplementedError
@@ -39,24 +39,24 @@ class Crop(Plant):
         'Zr': 500,          # Planting depth [mm]
         'sw_MPa':-1.5,      # Plant wilting point [MPa]
         's_star_MPa':-0.2,  # Water potential for max T
-        'kc_max':1.2,       # Maximum crop coefficient
-        'LAI_max':3.0,      # Max Leaf Area Index [m2/m2]
-        'T_max':4.0         # Max Crop Water Use [mm/day]
+        'KC_MAX':1.2,       # Maximum crop coefficient
+        'LAI_MAX':3.0,      # Max Leaf Area Index [m2/m2]
+        'T_MAX':4.0         # Max Crop Water Use [mm/day]
 
     """
-    def __init__(self, kc_max=1.2, LAI_max=3.0, T_max=4, lgp = 180, f1 = 0.2, f2 = 0.5, f3 = 0.75, 
-                 EoS = 1.0, kc_ini = 0.30, kc_EoS = 0.6,*args,**kwargs):
+    def __init__(self, KC_MAX=1.2, LAI_MAX=3.0, T_MAX=4, lgp = 180, F1 = 0.2, F2 = 0.5, F3 = 0.75, 
+                 EOS = 1.0, KC_INI = 0.30, KC_EOS = 0.6,*args,**kwargs):
 
-        self.kc_max = kc_max      # Maximum crop coefficient; Kc at Reproductive Stage [0-1]
-        self.LAI_max = LAI_max    # Maximum crop leaf area index [m^2/m^2]
-        self.T_max = T_max        # Maximum crop water use [mm/day]
+        self.KC_MAX = KC_MAX      # Maximum crop coefficient; Kc at Reproductive Stage [0-1]
+        self.LAI_MAX = LAI_MAX    # Maximum crop leaf area index [m^2/m^2]
+        self.T_MAX = T_MAX        # Maximum crop water use [mm/day]
         self.lgp = lgp            # Length of growing period [days]
-        self.f1 = f1              # Fraction of Season from Initial to Vegetative
-        self.f2 = f2              # Fraction of Season from Initial to Reproductive
-        self.f3 = f3              # Fraction of Season from Initial to Ripening
-        self.EoS = EoS            # Fraction of Season at End
-        self.kc_ini = kc_ini      # Kc at Initial Stage
-        self.kc_EoS = kc_EoS      # Kc at End of Season
+        self.F1 = F1              # Fraction of Season from Initial to Vegetative
+        self.F2 = F2              # Fraction of Season from Initial to Reproductive
+        self.F3 = F3              # Fraction of Season from Initial to Ripening
+        self.EOS = EOS            # Fraction of Season at End
+        self.KC_INI = KC_INI      # Kc at Initial Stage
+        self.KC_EOS = KC_EOS      # Kc at End of Season
         super(Crop, self).__init__(*args, **kwargs)
 
         # TODO check that when you change the lgp in model initialization that the kc value changes
@@ -76,26 +76,26 @@ class Crop(Plant):
         """
         if not day_of_season >= 0:
             raise ValueError ("day_of_season must be >= 0")
-        if day_of_season <= self.lgp*self.f1:
-            return self.kc_ini
-        elif day_of_season < self.lgp*self.f2:
-            return ((self.kc_max-self.kc_ini)/(self.f2*self.lgp-self.f1*self.lgp))*(day_of_season-self.f1*self.lgp)+self.kc_ini
-        elif day_of_season <= self.lgp*self.f3:
-            return self.kc_max
-        elif day_of_season < self.lgp*self.EoS:
-            return self.kc_ini+((day_of_season-self.EoS*self.lgp)/(self.f3*self.lgp-self.EoS*self.lgp))*self.kc_EoS+self.kc_ini
+        if day_of_season <= self.lgp*self.F1:
+            return self.KC_INI
+        elif day_of_season < self.lgp*self.F2:
+            return ((self.KC_MAX-self.KC_INI)/(self.F2*self.lgp-self.F1*self.lgp))*(day_of_season-self.F1*self.lgp)+self.KC_INI
+        elif day_of_season <= self.lgp*self.F3:
+            return self.KC_MAX
+        elif day_of_season < self.lgp*self.EOS:
+            return self.KC_INI+((day_of_season-self.EOS*self.lgp)/(self.F3*self.lgp-self.EOS*self.lgp))*self.KC_EOS+self.KC_INI
         else:
-            return self.kc_EoS
+            return self.KC_EOS
 
-    def calc_T_max(self, kc):
+    def calc_T_MAX(self, kc):
         """ Calculates max Transpiration variable.
         
-        Usage: calc_T_max(kc)
+        Usage: calc_T_MAX(kc)
 
-        T = kc * T_max
+        T = kc * T_MAX
             
         """
-        return kc * self.T_max
+        return kc * self.T_MAX
 
     def _kc_from_LAI(self, LAI, p=1):
         """ Returns a kc variable. kc comes
@@ -104,12 +104,12 @@ class Crop(Plant):
         
         Usage: _kc_from_LAI(LAI, p=1)
 
-            kc = (kc_max/LAI_max)^p * LAI.
+            kc = (KC_MAX/LAI_MAX)^p * LAI.
             
         Note: p=1 assumes a linear relationship between LAI and kc
 
         """
-        return pow((self.kc_max/self.LAI_max),p) * LAI
+        return pow((self.KC_MAX/self.LAI_MAX),p) * LAI
 
     def calc_LAI(self, kc, p=1):
         """ Returns a Leaf Area Index (LAI) variable. LAI comes
@@ -118,12 +118,12 @@ class Crop(Plant):
         
         Usage: calc_LAI(kc, p=1)
 
-            LAI = (LAI_max/kc_max)^p * kc.
+            LAI = (LAI_MAX/KC_MAX)^p * kc.
 
         Note: p=1 assumes a linear relationship between LAI and kc
 
         """
-        return pow((self.LAI_max/self.kc_max),p) * kc
+        return pow((self.LAI_MAX/self.KC_MAX),p) * kc
         
     def calc_T(self, s, LAI=None, kc=None):
         """ Calculates Transpiration variable as a stepwise
@@ -145,9 +145,9 @@ class Crop(Plant):
             kc = self._kc_from_LAI(LAI)
         if kc:
             if s>=self.s_star:
-                return self.calc_T_max(kc)
+                return self.calc_T_MAX(kc)
             elif s>=self.sw:
-                return (s-self.sw)/(self.s_star-self.sw)*self.calc_T_max(kc)
+                return (s-self.sw)/(self.s_star-self.sw)*self.calc_T_MAX(kc)
             else:
                 return 0
 
@@ -170,7 +170,7 @@ class Crop(Plant):
             stress = ((self.s_star - s)/(self.s_star - self.sw))**q
         return stress
 
-    def calc_dstress(self, s, stress, y_max=4260):
+    def calc_dstress(self, s, stress, Y_MAX=4260):
         '''Calculates dyamic stress (theta) which is a measure of total water stress during the growing season
         as proposed in Porporato et al. (2001). The last step calculates yield. 
         
@@ -182,18 +182,18 @@ class Crop(Plant):
         Default values:
             mstr_memb = average static stress [0-1]
             self.lgp = length of the growing season [days]
-            KPAR = fraction of growing season before crop fails [dim]
-            RPAR = effect of number of excursions below stress point [dim]
+            K_PAR = fraction of growing season before crop fails [dim]
+            R_PAR = effect of number of excursions below stress point [dim]
 
         Returns:
 
-            dstr_memb = (mstr_memb * mcrs_memb) / (KPAR * self.lgp))**(ncrs_memb**-RPAR)
-            yield_kg_ha = y_max * (1 - dstr_memb)
+            dstr_memb = (mstr_memb * mcrs_memb) / (K_PAR * self.lgp))**(ncrs_memb**-R_PAR)
+            yield_kg_ha = Y_MAX * (1 - dstr_memb)
         
         '''
         # Step 0. Define variables
-        KPAR = 0.5
-        RPAR = 2
+        K_PAR = 0.5
+        R_PAR = 0.5 # TODO: Not sure about this value. 
         INVL_SIMU = 1 # TODO: Not sure what this is. Need to justify.
 
         # Step 1. Calculate average static stress
@@ -217,11 +217,11 @@ class Crop(Plant):
             mcrs_memb = 0.
             
         # Step 3. Calculate dynamic stress
-        dstr_memb = ((mstr_memb * mcrs_memb) / (KPAR * self.lgp))**(ncrs_memb**-RPAR)
+        dstr_memb = ((mstr_memb * mcrs_memb) / (K_PAR * self.lgp))**(ncrs_memb**-R_PAR)
         if dstr_memb > 1.:
             dstr_memb = 1.
 
         # Step 4. Calculate yield
-        yield_kg_ha = y_max * (1 - dstr_memb)
+        yield_kg_ha = Y_MAX * (1 - dstr_memb)
 
         return dstr_memb, yield_kg_ha
