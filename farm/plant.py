@@ -171,8 +171,9 @@ class Crop(Plant):
         return stress
 
     def calc_dstress(self, s, stress, Y_MAX=4260):
-        '''Calculates dyamic stress (theta) which is a measure of total water stress during the growing season
-        as proposed in Porporato et al. (2001). The last step calculates yield. 
+        '''Calculates dyamic water stress (theta) which is a measure of total water stress during the growing season
+        as proposed in Porporato et al. (2001). Considers the duration and frequency of water difict periods below a 
+        critical value. The function also calculates yield based on dynamic water stress. 
         
         Usage: calc_dstress(s, stress):
 
@@ -181,9 +182,12 @@ class Crop(Plant):
 
         Default values:
             mstr_memb = average static stress [0-1]
+            mcrs_memb = average duration of water stress [days]
+            ncrs_memb = average frequency of water stress [dim]
             self.lgp = length of the growing season [days]
             K_PAR = fraction of growing season before crop fails [dim]
             R_PAR = effect of number of excursions below stress point [dim]
+            INVL_SIMU = number of daily timesteps used in calculating the soil moisture time series [dim]
 
         Returns:
 
@@ -207,11 +211,18 @@ class Crop(Plant):
             mstr_memb = 0.
 
         # Step 2. Calculate threshold crossing parameters
-        indx_memb = np.where(s >= self.s_star)
-        ccrs_memb = np.diff(np.append(0, np.append(indx_memb, INVL_SIMU * self.lgp + 1))) - 1
+        # Select indices of s time series where s is below wilting point
+        indx_memb = np.where(s >= self.s_star) 
+        # Append to an array using np.append where last value is lgp+1 and INVL_SIMU is how many simulations are being run
+        # Then have zero be the first item and 
+        # with np.diff give the difference to find the soil moisture difference between s_star and the excursion
+        ccrs_memb = np.diff(np.append(0, np.append(indx_memb, INVL_SIMU * self.lgp + 1))) - 1 # play around with this to figure it out 
+        # The duration of water stress events where there is stress because value is greater than 0
         ccrs_memb = ccrs_memb[ccrs_memb > 0]
-        ncrs_memb = len(ccrs_memb)  # dim
+        # Variable with number of excursions below wilting point (frequency)
+        ncrs_memb = len(ccrs_memb)  # dim 
         if ncrs_memb > 0:
+            # if there are more than 0 excursions then calculate mean of duration of water stress and divide by INVL_SIMU
             mcrs_memb = np.mean(ccrs_memb) / INVL_SIMU # days
         else:
             mcrs_memb = 0.
