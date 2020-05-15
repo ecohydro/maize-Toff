@@ -49,7 +49,7 @@ class TestPlant(unittest.TestCase):
         else:
             _mstr_memb = 0.  # dim
 
-        assert mstr_memb == _mstr_memb, "Should be true"
+        assert mstr_memb == _mstr_memb, "Error: Average static stress calculation in model should be the same as _mstr_memb calculated in this unittest."
 
 if __name__ == '__main__':
    unittest.main()

@@ -13,6 +13,7 @@ from farm import Climate
 from farm import Soil
 from farm import Crop
 from farm import CropModel
+from farm.functions import *
 
 # TODO: Consider subsuming test_sand into test_soil, and run these tests for various soil types
 class TestSand(unittest.TestCase):
@@ -26,7 +27,7 @@ class TestSand(unittest.TestCase):
 	# write tests
 	# 1. Is the hygroscopic soil moisture less than soil moisture at wilting point?
     def test_sh(self):
-        assert self.model.soil.sh <= self.model.crop.sw, "Should be true"
+        assert self.model.soil.sh <= self.model.crop.sw, "Error: hygroscopic soil moisture should be less than soil moisture at wilting point."
 
 
     # 2. Is field capacity less than 1?
