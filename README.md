@@ -163,7 +163,7 @@ From the root of the directory, run the following in the command line to put `fa
 
 ` pip install -e .`
 
-After that, run tests from the root of the project:
+After that, run tests from the subdirectory `tests`:
 
 `nosetests -vv test_sand`
 
