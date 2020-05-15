@@ -14,6 +14,7 @@ from farm import Climate
 from farm import Soil
 from farm import Crop
 from farm import CropModel
+from farm.functions import *
 
 
 class TestKc(unittest.TestCase):
@@ -33,4 +34,4 @@ class TestKc(unittest.TestCase):
 
     # write tests
     def inspect_kc(self):
-        assert max(model.kc) == 1.2, "Should be true"
+        assert max(model.kc) == 1.2, "Error: The max value for kc should be 1.2."
