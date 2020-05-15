@@ -173,7 +173,8 @@ class Crop(Plant):
     def calc_dstress(self, s, stress, Y_MAX=4260):
         '''Calculates dyamic water stress (theta) which is a measure of total water stress during the growing season
         as proposed in Porporato et al. (2001). Considers the duration and frequency of water difict periods below a 
-        critical value. The function also calculates yield based on dynamic water stress. 
+        critical value. The function also calculates yield based on dynamic water stress and returns three items in a
+        list: average static water stress, dynamic water stress, and yield in kg per ha. 
         
         Usage: calc_dstress(s, stress):
 
@@ -190,15 +191,15 @@ class Crop(Plant):
             INVL_SIMU = number of daily timesteps used in calculating the soil moisture time series [dim]
 
         Returns:
-
-            dstr_memb = (mstr_memb * mcrs_memb) / (K_PAR * self.lgp))**(ncrs_memb**-R_PAR)
-            yield_kg_ha = Y_MAX * (1 - dstr_memb)
+            mstr_memb = np.mean(((self.s_star - s)/(self.s_star - self.sw))**q) # average static water stress
+            dstr_memb = (mstr_memb * mcrs_memb) / (K_PAR * self.lgp))**(ncrs_memb**-R_PAR) # dynamic water stress
+            yield_kg_ha = Y_MAX * (1 - dstr_memb) # yield in kg per ha
         
         '''
         # Step 0. Define variables
         K_PAR = 0.5
         R_PAR = 0.5 # TODO: Not sure about this value. 
-        INVL_SIMU = 1 # TODO: Not sure what this is. Need to justify.
+        INVL_SIMU = 1
 
         # Step 1. Calculate average static stress
         if len(stress) > 0:
@@ -235,4 +236,4 @@ class Crop(Plant):
         # Step 4. Calculate yield
         yield_kg_ha = Y_MAX * (1 - dstr_memb)
 
-        return dstr_memb, yield_kg_ha
+        return mstr_memb, dstr_memb, yield_kg_ha
