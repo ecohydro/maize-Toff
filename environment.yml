@@ -7,3 +7,4 @@ dependencies:
   - matplotlib
   - seaborn
   - proplot
+  - nose
