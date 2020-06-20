@@ -10,6 +10,7 @@ default_climate = {
 }
 
 from datetime import timedelta, datetime
+
 datetimes = np.arange(
     datetime(2018,1,1), datetime(2019,1,1), timedelta(days=1)
     ).astype(datetime)
