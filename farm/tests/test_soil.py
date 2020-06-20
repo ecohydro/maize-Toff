@@ -13,6 +13,7 @@ from farm import Climate
 from farm import Soil
 from farm import Crop
 from farm import CropModel
+from farm.functions import *
 
 class TestSoil(unittest.TestCase):
 
