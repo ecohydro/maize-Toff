@@ -201,6 +201,7 @@ def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, 
                         x_lab = 'X label here', y_lab = 'Y label here', title = 'Title here', positive = True):
     """ Computes linear regression between independent and dependent variable. 
     Usage: plot_lin_regression(x_var, y_var, x_lab, y_lab, title)
+        Returns: R_squared, m, b
     """
     # Define variables
     X, y = x_var, y_var
@@ -244,9 +245,14 @@ def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, 
     plt.ylabel(y_lab)
     plt.title(title, fontweight="bold")
 
+    return R_squared, m, b
+
 def power_law_fit(xdat,ydat, x_lab, y_lab, title):
     x,y = xdat, ydat
+    #xmax = 4260
+    xmax = max(x)
     power_law = lambda x, a, b: a * (x**b)
+    
     f, axs = plot.subplots(ncols=1, nrows=2, share=0, figsize=(5,4)) 
     
     # Find best fit.
@@ -256,7 +262,8 @@ def power_law_fit(xdat,ydat, x_lab, y_lab, title):
     # Plot data and best fit curve.
     axs[0].plot(x, y,'ok', alpha=0.6)
     axs[0].plot(np.sort(x), power_law(np.sort(x), *popt),'-',markersize=3,  linewidth=2.5) # like this color color=(0.2, 0.4, 0.6, 0.6)
-    
+    axs[0].format(xlim=(100, 1000), ylim=(0, 5000))
+
     #r2, v1
     residuals = y - power_law(x, *popt)
     ss_res = np.sum(residuals**2)
@@ -267,6 +274,50 @@ def power_law_fit(xdat,ydat, x_lab, y_lab, title):
     #r2, v2
     from sklearn.metrics import r2_score
     r2_score(y, power_law(x, *popt), multioutput='variance_weighted')
+    
+    # Add text
+    textstr = r'$r^2=%.2f$' % (r_squared, )
+    props = dict(boxstyle='square', facecolor='lightgray', alpha=0.5)
+    axs[0].format(suptitle=title, title = textstr,titleweight='bold', titleloc='ul',
+                 ylabel=y_lab, xlabel=x_lab)
+    
+    # Bottom plot
+    axs[1].plot(residuals) #linewidth=.9
+    axs[1].format(title='Residuals', titleweight='bold',xlabel='Simulation Number',
+                 ylabel='Error') #, titleloc='ul
+    axs[0].set_xlim(min(x)-3, max(x)+10)  
+
+
+def plot_newfit(xdat,ydat, x_lab, y_lab, title):
+    x,y = xdat, ydat
+    #xmax = 4260
+    x,y = xdat, ydat
+    xmax = x.max()
+
+    def new_fit(x, A, B):
+        return A*(x - xmax)**2+B # testing this out
+
+    f, axs = plot.subplots(ncols=1, nrows=2, share=0, figsize=(5,4)) 
+    
+    # Find best fit.
+    popt, pcov = curve_fit(new_fit, x, y)
+    
+    # Top plot
+    # Plot data and best fit curve.
+    axs[0].plot(x, y,'ok', alpha=0.6)
+    axs[0].plot(np.sort(x), new_fit(np.sort(x), *popt),'-',markersize=3,  linewidth=2.5) # like this color color=(0.2, 0.4, 0.6, 0.6)
+    axs[0].format(xlim=(0, 1000), ylim=(0, 5000))
+    
+    #r2, v1
+    residuals = y - new_fit(x, *popt)
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((y-np.mean(y))**2)
+    r_squared = 1 - (ss_res / ss_tot)
+    r_squared
+    
+    #r2, v2
+    from sklearn.metrics import r2_score
+    r2_score(y, new_fit(x, *popt), multioutput='variance_weighted')
     
     # Add text
     textstr = r'$r^2=%.2f$' % (r_squared, )
@@ -299,16 +350,21 @@ def polyfit(x, y, degree):
 
     return results, yhat, ybar
 
-def plot_polyfit(x=None, y=None, degree=2, x_lab='Seasonal rainfall (mm)',y_lab='Yield (kg/ha)',title='Polynomial fit'):
+def plot_polyfit(x=None, y=None, degree=None, x_lab='Seasonal rainfall (mm)',y_lab='Yield (kg/ha)',title='Polynomial fit'):
     # degree = degree of the fitting polynomial
-    
+    # stop the linspace at the x max of data
+    xmin = min(x)
+    xmax = max(x)
+
     fig, ax = plt.subplots(figsize=(5,4))
-    p = np.poly1d(np.polyfit(x, y, 3))
-    t = np.linspace(200, 876, 1000)
+    p = np.poly1d(np.polyfit(x, y, degree))
+    t = np.linspace(xmin, xmax, 1000)
 
     ax.plot(x, y, 'ok', t, p(t), '-', markersize=3, alpha=0.6, linewidth=2.5)
+    #ax.format(xlim=(0, xmax+50), ylim=(0, 4000))
+    results, yhat, ybar = polyfit(x,y,degree)
+    
 
-    results, yhat, ybar = polyfit(x,y,3)
     R_squared = results['determination']
     textstr = r'$r^2=%.2f$' % (R_squared, )
     props = dict(boxstyle='square', facecolor='lightgray', alpha=0.5)
@@ -323,4 +379,3 @@ def plot_polyfit(x=None, y=None, degree=2, x_lab='Seasonal rainfall (mm)',y_lab=
     results['polynomial'][0]
 
     # TODO: confidence intervals around line?
-
