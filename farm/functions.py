@@ -229,16 +229,16 @@ def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, 
     if positive == True:
         textstr = '\n'.join((
             r'$ y = %.2f$x' % (m, )+'+$  %2.0f$' % (b, ),
-            r'$r^2=%.2f$' % (R_squared, ))) 
+            r'$r^2 = %.2f$' % (R_squared, ))) 
     else:
         textstr = '\n'.join((
         r'$ y = %.2f$x' % (m, )+'$  %2.0f$' % (b, ),
-        r'$r^2=%.2f$' % (R_squared, )))
+        r'$r^2 = %.2f$' % (R_squared, )))
 
-    props = dict(boxstyle='square', facecolor='lightgray', alpha=0.5)
+    props = dict(boxstyle='square', facecolor='white', alpha=0.5, ec="b", lw=2)
 
     # place a text box in upper left in axes coords
-    g.fig.text(0.25, 2.27, textstr, fontsize=10, #transform=ax.transAxes, 
+    plt.text(101, 4500, textstr, fontsize=10, #transform=ax.transAxes, 
             verticalalignment='top', bbox=props)
     
     plt.xlabel(x_lab)
