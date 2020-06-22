@@ -198,9 +198,12 @@ def calc_yield(stress=None, max_yield = 4680):
 
 # TODO: Consider moving plotting functions into their own script.
 def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, data = None, 
+                        ann_x = 101, ann_y = 4500, 
                         x_lab = 'X label here', y_lab = 'Y label here', title = 'Title here', positive = True):
     """ Computes linear regression between independent and dependent variable. 
     Usage: plot_lin_regression(x_var, y_var, x_lab, y_lab, title)
+        ann_x = where on x-axis annotation should be placed
+        ann_y = where on y-axis annotation should be placed
         Returns: R_squared, m, b
     """
     # Define variables
@@ -235,10 +238,10 @@ def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, 
         r'$ y = %.2f$x' % (m, )+'$  %2.0f$' % (b, ),
         r'$r^2 = %.2f$' % (R_squared, )))
 
-    props = dict(boxstyle='square', facecolor='white', alpha=0.5, ec="b", lw=2)
+    props = dict(boxstyle='square', facecolor='white', alpha=0.5, lw = 1.5) # , ec="b"
 
     # place a text box in upper left in axes coords
-    plt.text(101, 4500, textstr, fontsize=10, #transform=ax.transAxes, 
+    plt.text(ann_x, ann_y, textstr, fontsize=10, #transform=ax.transAxes, 
             verticalalignment='top', bbox=props)
     
     plt.xlabel(x_lab)
