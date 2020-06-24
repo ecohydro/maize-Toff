@@ -291,7 +291,7 @@ def power_law_fit(xdat,ydat, x_lab, y_lab, title):
     axs[0].set_xlim(min(x)-3, max(x)+10)  
 
 
-def plot_newfit(xdat,ydat, x_lab, y_lab, title):
+def plot_newfit(xdat,ydat, x_lab, y_lab, title=None):
     x,y = xdat, ydat
     #xmax = 4260
     x,y = xdat, ydat
@@ -300,7 +300,7 @@ def plot_newfit(xdat,ydat, x_lab, y_lab, title):
     def new_fit(x, A, B):
         return A*(x - xmax)**2+B # testing this out
 
-    f, axs = plot.subplots(ncols=1, nrows=2, share=0, figsize=(5,4)) 
+    f, axs = plot.subplots(ncols=1, nrows=3, share=0, figsize=(5,4)) 
     
     # Find best fit.
     popt, pcov = curve_fit(new_fit, x, y)
@@ -325,14 +325,23 @@ def plot_newfit(xdat,ydat, x_lab, y_lab, title):
     # Add text
     textstr = r'$r^2=%.2f$' % (r_squared, )
     props = dict(boxstyle='square', facecolor='lightgray', alpha=0.5)
-    axs[0].format(suptitle=title, title = textstr,titleweight='bold', titleloc='ul',
+    axs[0].format(suptitle='y = A(x - xmax)**2B', title = textstr,titleweight='bold', titleloc='ul',
                  ylabel=y_lab, xlabel=x_lab)
     
     # Bottom plot
     axs[1].plot(residuals) #linewidth=.9
-    axs[1].format(title='Residuals', titleweight='bold',xlabel='Simulation Number',
+    axs[1].format(title='Residuals, Time Series', titleweight='bold',xlabel='Simulation Number',
                  ylabel='Error') #, titleloc='ul
     axs[0].set_xlim(min(x)-3, max(x)+10)  
+
+    # Plot histogram of the residuals
+    n_bins = 100
+    axs[2].hist(residuals, bins=n_bins)
+    axs[2].format(title='Residuals, Histogram', titleweight='bold',xlabel='Error',
+                 ylabel='Number of Simulations') #, titleloc='ul
+    
+    return residuals
+    
 
 def polyfit(x, y, degree):
     results = {}
