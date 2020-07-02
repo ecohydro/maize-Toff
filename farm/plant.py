@@ -1,6 +1,16 @@
 #%% Plant Class Definition
 import numpy as np
 
+"""
+This is the "example" module.
+
+The example module supplies one function, factorial().  For example,
+
+>>> Soil('Sand')
+<__main__.Soil object at 0x7fe13f96f0b8>
+
+"""
+
 class Plant():
     """ Defines a plant class
 
@@ -172,7 +182,7 @@ class Crop(Plant):
 
     def calc_dstress(self, s, stress, Y_MAX=4260):
         '''Calculates dyamic water stress (theta) which is a measure of total water stress during the growing season
-        as proposed in Porporato et al. (2001). Considers the duration and frequency of water difict periods below a 
+        as proposed in Porporato et al. (2001). Considers the duration and frequency of water defict periods below a 
         critical value. The function also calculates yield based on dynamic water stress and returns three items in a
         list: average static water stress, dynamic water stress, and yield in kg per ha. 
         
@@ -197,14 +207,14 @@ class Crop(Plant):
         
         '''
         # Step 0. Define variables
-        K_PAR = 0.55
+        K_PAR = 0.2
         R_PAR = 0.2 
         INVL_SIMU = 1
 
         # Step 1. Calculate average static stress
         if len(stress) > 0:
             # Subset the growing period and get avg soil moisture
-            start = 21 
+            start = 60 
             end = start + self.lgp
             stress_subset = stress[start:end]
             mstr_memb = np.mean(stress_subset)

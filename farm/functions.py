@@ -198,9 +198,12 @@ def calc_yield(stress=None, max_yield = 4680):
 
 # TODO: Consider moving plotting functions into their own script.
 def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, data = None, 
+                        ann_x = 101, ann_y = 4500, 
                         x_lab = 'X label here', y_lab = 'Y label here', title = 'Title here', positive = True):
     """ Computes linear regression between independent and dependent variable. 
     Usage: plot_lin_regression(x_var, y_var, x_lab, y_lab, title)
+        ann_x = where on x-axis annotation should be placed
+        ann_y = where on y-axis annotation should be placed
         Returns: R_squared, m, b
     """
     # Define variables
@@ -229,16 +232,16 @@ def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, 
     if positive == True:
         textstr = '\n'.join((
             r'$ y = %.2f$x' % (m, )+'+$  %2.0f$' % (b, ),
-            r'$r^2=%.2f$' % (R_squared, ))) 
+            r'$r^2 = %.2f$' % (R_squared, ))) 
     else:
         textstr = '\n'.join((
         r'$ y = %.2f$x' % (m, )+'$  %2.0f$' % (b, ),
-        r'$r^2=%.2f$' % (R_squared, )))
+        r'$r^2 = %.2f$' % (R_squared, )))
 
-    props = dict(boxstyle='square', facecolor='lightgray', alpha=0.5)
+    props = dict(boxstyle='square', facecolor='white', alpha=0.5, lw = 1.5) # , ec="b"
 
     # place a text box in upper left in axes coords
-    g.fig.text(0.25, 2.27, textstr, fontsize=10, #transform=ax.transAxes, 
+    plt.text(ann_x, ann_y, textstr, fontsize=10, #transform=ax.transAxes, 
             verticalalignment='top', bbox=props)
     
     plt.xlabel(x_lab)
@@ -288,7 +291,7 @@ def power_law_fit(xdat,ydat, x_lab, y_lab, title):
     axs[0].set_xlim(min(x)-3, max(x)+10)  
 
 
-def plot_newfit(xdat,ydat, x_lab, y_lab, title):
+def plot_newfit(xdat,ydat, x_lab, y_lab, title=None):
     x,y = xdat, ydat
     #xmax = 4260
     x,y = xdat, ydat
@@ -297,7 +300,7 @@ def plot_newfit(xdat,ydat, x_lab, y_lab, title):
     def new_fit(x, A, B):
         return A*(x - xmax)**2+B # testing this out
 
-    f, axs = plot.subplots(ncols=1, nrows=2, share=0, figsize=(5,4)) 
+    f, axs = plot.subplots(ncols=1, nrows=3, share=0, figsize=(5,4)) 
     
     # Find best fit.
     popt, pcov = curve_fit(new_fit, x, y)
@@ -322,14 +325,23 @@ def plot_newfit(xdat,ydat, x_lab, y_lab, title):
     # Add text
     textstr = r'$r^2=%.2f$' % (r_squared, )
     props = dict(boxstyle='square', facecolor='lightgray', alpha=0.5)
-    axs[0].format(suptitle=title, title = textstr,titleweight='bold', titleloc='ul',
+    axs[0].format(suptitle='y = A(x - xmax)**2B', title = textstr,titleweight='bold', titleloc='ul',
                  ylabel=y_lab, xlabel=x_lab)
     
     # Bottom plot
     axs[1].plot(residuals) #linewidth=.9
-    axs[1].format(title='Residuals', titleweight='bold',xlabel='Simulation Number',
+    axs[1].format(title='Residuals, Time Series', titleweight='bold',xlabel='Simulation Number',
                  ylabel='Error') #, titleloc='ul
     axs[0].set_xlim(min(x)-3, max(x)+10)  
+
+    # Plot histogram of the residuals
+    n_bins = 100
+    axs[2].hist(residuals, bins=n_bins)
+    axs[2].format(title='Residuals, Histogram', titleweight='bold',xlabel='Error',
+                 ylabel='Number of Simulations') #, titleloc='ul
+    
+    return residuals
+    
 
 def polyfit(x, y, degree):
     results = {}

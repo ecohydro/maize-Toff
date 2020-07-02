@@ -1,4 +1,3 @@
-
 """
 Name:           model.py
 Compatibility:  Python 3.7
@@ -88,7 +87,7 @@ class CropModel():
             do_output=False,
             s0=0.3,
             planting_date=100,
-            t_before=21,
+            t_before=60,
             t_after=7):
         """ Runs the ecohydro crop model.
 
