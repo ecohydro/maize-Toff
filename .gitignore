@@ -116,4 +116,7 @@ dat/PII
 dat/var_dat
 MATLAB/
 #py/
-
+/output/figures
+/output/dataframes
+/notebooks/tutorials
+/notebooks/EDA
