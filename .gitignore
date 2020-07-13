@@ -112,8 +112,10 @@ venv.bak/
 .DS_Store
 
 # hidden dirs
-dat/PII
-dat/var_dat
-MATLAB/
 #py/
-
+/output/figures
+/output/dataframes
+/notebooks/tutorials
+/notebooks/EDA
+/output/4-cultivar-analysis
+/output/2-rainfall-variability
