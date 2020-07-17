@@ -17,7 +17,7 @@ class Plant():
 
     """
     def __init__(self,
-        Zr=500,             # Rooting depth [mm]
+        Zr=400,             # Rooting depth [mm]
         T_MAX=4,            # Maximum transpiration [mm/day]
         sw_MPa = -1.5,      # wilting point of plant in water potential [MPa]
         s_star_MPa = -0.05, # water potential of maximum transpiration [MPa], 
@@ -207,7 +207,7 @@ class Crop(Plant):
         
         '''
         # Step 0. Define variables
-        K_PAR = 0.2
+        K_PAR = 0.5
         R_PAR = 0.2 
         INVL_SIMU = 1
 
