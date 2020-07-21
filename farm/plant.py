@@ -207,7 +207,7 @@ class Crop(Plant):
         
         '''
         # Step 0. Define variables
-        K_PAR = 0.5
+        K_PAR = 0.2
         R_PAR = 0.2 
         INVL_SIMU = 1
 
