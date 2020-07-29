@@ -206,7 +206,7 @@ class Soil():
         self.c = 2*self.b + 3
 
         # Hygroscopic point is when soil is so dry no further evaporation will occur.
-        self.sh = self.s(self.theta(-12))               # Hygroscopic point in relative soil moisture [0-1] # TODO: We also set this to -100 for testing
+        self.sh = self.s(self.theta(-10))               # Hygroscopic point in relative soil moisture [0-1]
         self.nZr = None                                 # TODO: Hygroscopic point is a wonky parameter stuck in the middle code.. consider setting elsewhere
 
     def _check_nZr(self):
