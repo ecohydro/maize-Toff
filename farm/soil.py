@@ -193,8 +193,12 @@ class Soil():
 
         # This version of sfc calculation comes from Laio et al. 2001b. Specifically, cf. the discussion
         # on p.714, and equation 15. 
-        self.sfc = pow(0.05/(self.Ks/10),1/(2*self.b+3))  # Convert Ks in cm/day 
+        # self.sfc = pow(0.05/(self.Ks/10),1/(2*self.b+3))  # Convert Ks in cm/day 
+
+        # This version of the sfc calculation uses the psi-theta relationships in Clapp & Hornberger to 
+        # determine s_fc based on a texture-specific field_capacity.
         self.sfc = self.s(psi=field_capacity)
+        
         # Make sure that field capacity is always lower than soil porosity.
         if self.sfc > 1:
             raise ValueError("soil field capacity, {sfc} is larger than 1".format(
