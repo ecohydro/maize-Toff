@@ -408,10 +408,16 @@ class Soil():
             # Don't need eta because no dependence on climate
             m =  self.Ks / (nZr * ( exp( beta*(1 - sfc) ) - 1 ))  
            
-            L = (1 / beta * ln( 
-                ( - m + m * exp(beta*(s0 - sfc)) * exp( beta * ( - m ) * t ) 
-                - m * exp( beta * (s0 - sfc) ) )
-                / ( - m ) ) )
+            # Calculate L. 
+            # Solution to L(s) = - ds/dt = - (s(t) - s(t0))
+            # Note: this solution is correct. There is a missing close 
+            # parenthesis in Laio et al. (2001) Eq. 20, so their equation should
+            # not be used directly.
+            L = (1 /  beta ) * ln( 
+                exp(beta * (s0 - sfc)) 
+                - exp(- m * beta * t ) * (exp(beta *  (s0 - sfc)) - 1) )
+
+            
             L = min(L,Lmax) # Don't return a value larger than Lmax
             if units=='mm/day':
                 return L * nZr
