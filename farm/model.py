@@ -153,12 +153,11 @@ class CropModel():
                 self.LAI[t] = self.crop.calc_LAI(self.kc[dos])
                 self.stress[t] = self.crop.calc_stress(self.s[t])
 
-                # 2. Calculate ET terms
-                self.T[t] = self.crop.calc_T(self.s[t],LAI=self.LAI[t])   # mm/day
-                self.E[t] = self.climate.calc_E(self.s[t], LAI = self.LAI[t], sh = self.soil.sh)
-                self.ET[t] = self.T[t] + self.E[t]
+                # 1. Calculate Q
+                self.Q[t] = self.soil.calc_Q(self.s[t], units='mm/day')
 
-                # 1. Update Soil Moisture Water Balance (Part 1)
+
+                # 2. Update Soil Moisture Water Balance (Part 1)
 
                 """ Note:
 
@@ -169,20 +168,21 @@ class CropModel():
                 to get above either the field capacity (soil.sfc) or saturation
                 (i.e. s > 1). In either case, two additional fluxes would kick in.
 
-                Therefore, we first see how Rainfall and ET affect s, and update a
-                temporary s value, _s, with the temporary dsdt value, _dsdt.
+                Therefore, we first see how Rainfall and runoff affect s, and update 
+                a temporary s value, _s, with the temporary dsdt value, _dsdt.
 
-
-                _dsdt = R(t) - E(s,t)
+                _dsdt = R(t) - Q(s)
                 _s = s(t) + _dsdt
 
-                Now we can use the value of _s to see if leakage or runoff
-                occur in this time step (Step 3 and Step 4). 
+                Now we can use the value of _s to determine leakage and ET
+                in this time step (Step 3 and Step 4). Note: we allow both leakage
+                and ET to start from the same _s value, which overestimates ET,
+                rather than underestimating ET (as in a bucket model).
                 
-                Then, once we have values of L(t) and Q(t) based on _s,
+                Then, once we have values of L(t) and ET(t) based on _s,
                 we update the dsdt and s values using our master equations:
 
-                dsdt(t) = R(t) - E(s,t) - L(s,t) - Q(s,t)
+                dsdt(t) = R(t) - Q(s,t) - E(s,t) - L(s,t)
                 s(t+1) = s(t) + dsdt
 
                 All this _s and _dsdt stuff is an abstraction that allows us to 
@@ -193,15 +193,19 @@ class CropModel():
                 """
                 # Create temporary s and dsdt value for 
                 # use within timestep calculations:
-                _dsdt = self.R[t] - self.ET[t]         # mm/day
+                _dsdt = self.R[t] - self.Q[t]         # mm/day
                 _s = self.s[t] + _dsdt/self.nZr
                 
-                # 3. Determine saturation excess flow
-                # Note: Use the temporary (intermediate) s value 
-                # for this calculation rather than s[t]
-                self.Q[t] = self.soil.calc_Q(
-                    _s, units='mm/day')
-                
+                # 3. Calculate ET terms.
+                # Note: Use the temporary (intermediate) s value
+                # for this calculation rather than s[t].
+                self.T[t] = self.crop.calc_T(
+                    _s, LAI=self.LAI[t])   # mm/day
+                self.E[t] = self.climate.calc_E(
+                    _s, LAI = self.LAI[t], 
+                    sh = self.soil.sh)
+                self.ET[t] = self.T[t] + self.E[t]
+
                 # 4. Determine leakage loss:
                 # Note: Use the temporary (intermediate) s value 
                 # for this calculation rather than s[t]
@@ -209,7 +213,7 @@ class CropModel():
                     _s, units='mm/day')
 
                 # 5. Update Soil Moisture Water Balance (Part 2)
-                self.dsdt[t] = self.R[t] - self.ET[t] - self.Q[t] - self.L[t]
+                self.dsdt[t] = self.R[t] - self.Q[t] - self.ET[t] - self.L[t]
                 self.s[t+1] = self.s[t] + self.dsdt[t]/self.nZr
                 # print(
                 #     f"Time: {t}\t s(t):{self.s[t]:.3f}\t"
