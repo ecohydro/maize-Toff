@@ -151,7 +151,7 @@ def make_climate_parameters(station='OL JOGI FARM'):
 	lambda_by_month = (
 	    rain_days.groupby('Month')[station].count() /
 	    all_days.groupby('Month')[station].count()
-	)
+	); print(lambda_by_month)
 
 	alpha_by_month = rain_days.groupby('Month')[station].mean()
 
@@ -199,7 +199,7 @@ def calc_yield(stress=None, max_yield = 4680):
 # TODO: Consider moving plotting functions into their own script.
 def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, data = None, 
                         ann_x = 101, ann_y = 4500, 
-                        x_lab = 'X label here', y_lab = 'Y label here', title = 'Title here', positive = True):
+                        x_lab = 'X label here', y_lab = 'Y label here', title = 'Title here', positive = True, plot = False):
     """ Computes linear regression between independent and dependent variable. 
     Usage: plot_lin_regression(x_var, y_var, x_lab, y_lab, title)
         ann_x = where on x-axis annotation should be placed
@@ -216,18 +216,36 @@ def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, 
 
     y_pred = m*X + b
 
-    plt.figure(figsize=(5,4))
+    if plot == False:
+        # Calculate residuals
+        res = y - y_pred
+        tot = y - y.mean()
 
-    g = sns.lmplot(x_str, y_str, data, ci=95, height=4, scatter_kws={'color':'black','alpha':0.6}) # ,, line_kws={'color': 'black'}
-    
-    # Calculate residuals
-    res = y - y_pred
-    tot = y - y.mean()
+        R_squared = 1 - res.dot(res) / tot.dot(tot)
 
-    R_squared = 1 - res.dot(res) / tot.dot(tot)
-    print(R_squared)
-    print('m',m)
-    print('b',b)
+    else:
+        plt.figure(figsize=(5,4))
+
+        g = sns.lmplot(x_str, y_str, data, ci=95, height=4, scatter_kws={'color':'black','alpha':0.6}) # ,, line_kws={'color': 'black'}
+     
+        # Calculate residuals
+        res = y - y_pred
+        tot = y - y.mean()
+
+        R_squared = 1 - res.dot(res) / tot.dot(tot)
+        print(R_squared)
+        print('m',m)
+        print('b',b)
+
+        props = dict(boxstyle='square', facecolor='white', alpha=0.5, lw = 1.5) # , ec="b"
+
+        # place a text box in upper left in axes coords
+        plt.text(ann_x, ann_y, textstr, fontsize=10, #transform=ax.transAxes, 
+                verticalalignment='top', bbox=props)
+
+        plt.xlabel(x_lab)
+        plt.ylabel(y_lab)
+        plt.title(title, fontweight="bold")
     
     if positive == True:
         textstr = '\n'.join((
@@ -237,16 +255,6 @@ def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, 
         textstr = '\n'.join((
         r'$ y = %.2f$x' % (m, )+'$  %2.0f$' % (b, ),
         r'$r^2 = %.2f$' % (R_squared, )))
-
-    props = dict(boxstyle='square', facecolor='white', alpha=0.5, lw = 1.5) # , ec="b"
-
-    # place a text box in upper left in axes coords
-    plt.text(ann_x, ann_y, textstr, fontsize=10, #transform=ax.transAxes, 
-            verticalalignment='top', bbox=props)
-    
-    plt.xlabel(x_lab)
-    plt.ylabel(y_lab)
-    plt.title(title, fontweight="bold")
 
     return R_squared, m, b
 
@@ -391,3 +399,26 @@ def plot_polyfit(x=None, y=None, degree=None, x_lab='Seasonal rainfall (mm)',y_l
     results['polynomial'][0]
 
     # TODO: confidence intervals around line?
+
+
+def evolved_calc_yield(dtm=None, m=None, b=None):
+    yield_kg_ha = m*dtm + b
+
+    if dtm > 185:
+        raise ValueError("days to maturity, {dtm} is larger than 175".format(
+                dtm=dtm))
+    if dtm < 68:
+        raise ValueError("days to maturity, {dtm} is less than 68".format(
+                dtm=dtm))
+
+    return yield_kg_ha
+
+# verified using Kenya Seed Co. - https://web.archive.org/web/20190819125927/http://kenyaseed.com/gallery/maize/
+verified_hybrid_data = pd.read_csv('../data/Yields/hybrid_yields_verified.csv')
+
+# convert to metric tons
+verified_hybrid_data['yield_metric_tons'] = verified_hybrid_data.verified_yield_kg_acre/1000
+p, m, b = plot_lin_regression(verified_hybrid_data.verified_days_to_maturity, verified_hybrid_data.yield_metric_tons, 
+                             'verified_days_to_maturity', 'yield_metric_tons', verified_hybrid_data, 
+                             85, 4.9, 'Days to Maturity (days)', 'Yield (tons/ha)', 
+                             'Potential Maize Yields from Kenya Seed Company', positive=False)
