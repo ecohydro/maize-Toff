@@ -20,13 +20,11 @@
   'SHAMATA', 'SIRAJI (NRM)', 'SIRIMA (NRM)', 'SOLIO RANCH', 'SOUTH MARMANET FOREST STN', 
   'SUGUROI ESTATE', 'TELEKI (MT KENYA)', 'TELESWANI (NRM)', 'THARUA FARM', 'TIMAU MARANIA', 'TRENCH FARM']
 """
-import scipy.stats as st
 from scipy.optimize import curve_fit
 import pandas as pd
 import numpy as np
 import copy
 from datetime import datetime
-from dateutil.relativedelta import *
 import matplotlib.pyplot as plt
 import seaborn as sns
 import proplot as plot
@@ -34,6 +32,7 @@ import functools
 from .climate import Climate
 from .model import CropModel
 
+<<<<<<< HEAD
 def check_exponential(data):
 
 	""" Defines function that fits daily rainfall amounts to an exponential distribution and returns pdf 
@@ -163,26 +162,28 @@ def make_climate_parameters(station='OL JOGI FARM'):
 	return climate['alpha_by_month'].to_list(), climate['lambda_by_month'].to_list(), rainfall
 
 
+=======
+>>>>>>> 03e901013bc527c87c0f6c82e7a78f675ecc9021
 @functools.lru_cache(maxsize=128)
 def average_soil_moisture(model, n_sims=100, t_before=60, doy=None):
 
-	alpha_r = model.climate.alpha_r
-	lambda_r = model.climate.lambda_r
-	climates = [Climate(alpha_r, lambda_r) for sim in np.arange(n_sims)]
+    alpha_r = model.climate.alpha_r
+    lambda_r = model.climate.lambda_r
+    climates = [Climate(alpha_r, lambda_r) for sim in np.arange(n_sims)]
     
-	# Create a temporary crop object with a 0 day length of growing period.
-	temp_crop = copy.copy(model.crop)
-	temp_crop.lgp = 0
+    # Create a temporary crop object with a 0 day length of growing period.
+    temp_crop = copy.copy(model.crop)
+    temp_crop.lgp = 0
 
     # Get output from each simulataion using an implicit for loop.
-	# Use the temp crop object to create these models.
-	models = [ CropModel(crop=temp_crop,soil=model.soil,climate=climates[i]) for i in np.arange(n_sims) ]
-	
-	output = [ models[i].run(do_output=True, planting_date=doy+1, t_before=t_before, t_after=0) for i in np.arange(n_sims) ]
+    # Use the temp crop object to create these models.
+    models = [ CropModel(crop=temp_crop,soil=model.soil,climate=climates[i]) for i in np.arange(n_sims) ]
+    
+    output = [ models[i].run(do_output=True, planting_date=doy+1, t_before=t_before, t_after=0) for i in np.arange(n_sims) ]
 
     # Extract the final value of soil moisture from each output.
-	values = pd.DataFrame([output[i]['s'][-1:] for i in np.arange(n_sims)])
-	return values.mean(), values.std()
+    values = pd.DataFrame([output[i]['s'][-1:] for i in np.arange(n_sims)])
+    return values.mean(), values.std()
 
 def calc_yield(stress=None, max_yield = 4680):
     yield_kg_ha = -max_yield*stress + max_yield
