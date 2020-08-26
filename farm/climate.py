@@ -17,8 +17,9 @@ from datetime import timedelta, datetime
 datetimes = np.arange(
     datetime(2018,1,1), datetime(2019,1,1), timedelta(days=1)
     ).astype(datetime)
-month_value_by_day = np.array([datetime.month for datetime in datetimes])
 
+month_value_by_day = np.array([datetime.month for datetime in datetimes])
+week_value_by_day = np.array([datetime.isocalendar()[1] for datetime in datetimes])
 
 
 def check_exponential(data):
@@ -86,7 +87,8 @@ def check_exponential(data):
 def make_climate_parameters(
         station='OL JOGI FARM',
         data_file="data/CETRAD/CETRAD_rainfall.csv",
-        year_min=30):
+        year_min=30,
+        interval='month'):
     """ 
 
 
@@ -114,6 +116,8 @@ def make_climate_parameters(
     # Step 3. Extract the Year and Month from the Datetime to make aggregation easier.
     df['Year'] = [dt.year for dt in df['Datetime']]
     df['Month'] = [dt.month for dt in df['Datetime']]
+    df['Week'] = [dt.week for dt in df['Datetime']]
+    # TODO: Create a column of decads for each row in rainfall record.
 
     n_years = len(df['Year'].unique())
 
@@ -130,7 +134,7 @@ def make_climate_parameters(
     # We will keep the Datetime column, in case we need it later.
     df = df.drop(['RDate'], axis=1)
 
-    columns = [station] + ['Year', 'Month', 'Datetime']
+    columns = [station] + ['Year', 'Month', 'Week', 'Datetime']
     rainfall = df[columns]
 
     # First, find all the rows in the data where it rained and group by month.
@@ -145,20 +149,24 @@ def make_climate_parameters(
     # Fit the daily rainfall amounts to an exponential distribution.
     check_exponential(data)
 
-    # Determine the Monthly values of alpha and lambda from the station data:
-    lambda_by_month = (
-        rain_days.groupby('Month')[station].count() /
-        all_days.groupby('Month')[station].count()
-    )
-
-    alpha_by_month = rain_days.groupby('Month')[station].mean()
-
+    if interval == 'month':
+        # Determine the Monthly values of alpha and lambda from the station data:
+        lambda_values = (
+            rain_days.groupby('Month')[station].count() /
+            all_days.groupby('Month')[station].count()
+        )
+        alpha_values = rain_days.groupby('Month')[station].mean()
+    elif interval == 'week':
+        lambda_values = (
+            rain_days.groupby('Week')[station].count() / 
+            all_days.groupby('Week')[station].count()
+        )
+        alpha_values = rain_days.groupby('Week')[station].mean()
+    elif interval == 'decad':
+        raise(NotImplementedError)
     # MAKE THE CLIMATE PARAMETER DICT:
-    climate = pd.DataFrame(alpha_by_month)
-    climate = climate.rename(columns={station: 'alpha_by_month'})
-    climate['lambda_by_month'] = lambda_by_month
 
-    return climate['alpha_by_month'].to_list(), climate['lambda_by_month'].to_list()
+    return alpha_values.to_list(), lambda_values.to_list()
 
 
 # Should we rename this?
@@ -197,8 +205,13 @@ class Climate():
         # 2. has length of 365, which means we have specified daily values.
         # 3. has length of 12, which means we have specified monthly values.
         if 'station' in kwargs:
-            alpha_r, lambda_r = make_climate_parameters(station=kwargs['station'])
-
+            if 'data_file' in kwargs:
+                alpha_r, lambda_r = make_climate_parameters(
+                    station=kwargs['station'],
+                    data_file=kwargs['data_file'],
+                    interval='week')
+            else:
+                alpha_r, lambda_r = make_climate_parameters(station=kwargs['station'], interval='week')
         if isinstance(lambda_r, (float, int)):
             if isinstance(alpha_r, (float, int)):
                 # We have a constant value:
@@ -220,6 +233,17 @@ class Climate():
                     )
                 alpha_r_list = np.array(
                     [alpha_r[month_value-1] for month_value in month_value_by_day]
+                    )
+            else:
+                raise ValueError("lambda_r values and alpha_r values must be same length")
+        elif len(lambda_r) == 53:
+            if len(alpha_r) == 53:
+                # We have weekly values (remember that python is zero-indexed)
+                lambda_r_list = np.array(
+                    [lambda_r[week_value-1] for week_value in week_value_by_day]
+                    )
+                alpha_r_list = np.array(
+                    [alpha_r[week_value-1] for week_value in week_value_by_day]
                     )
             else:
                 raise ValueError("lambda_r values and alpha_r values must be same length")
