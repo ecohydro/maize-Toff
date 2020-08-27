@@ -32,6 +32,138 @@ import functools
 from .climate import Climate
 from .model import CropModel
 
+<<<<<<< HEAD
+def check_exponential(data):
+
+	""" Defines function that fits daily rainfall amounts to an exponential distribution and returns pdf 
+		and r2. The r2 should be above 0.9 to be an exponential.
+
+		Usage:
+
+			check_exponential(data):
+
+				returns r2, pdf
+
+		How it works:
+		- Step 1: To fit the distribution, we use functions from python's suite of numerical analysis, scipy.
+		The scipy.stats module has a large suite of distribution functions pre-defined, which we can use to 
+		develop a fit for our data. The distribution we are interested in is the exponential distribution, 
+		which is called expon in the stats module.
+
+		- Step 2-4: Calculate fitted PDF and error with fit in distribution. To test the fit of our distribution, 
+		we can compare the empirical histogram to that predicted by our model. We first use our `data` to generate 
+		the empirical histogram. In this example, we break the data into `30` bins, and we generate a histrogram 
+		of `density` rather than counts. This allows for an easier comparison between our empirical data and the 
+		fitted probability distribution function. 
+		
+		Here are the steps:
+
+		1. Generate a histogram, from the `data`. Save the bin locations in `x` and the density of values in `y`
+		2. Shift the `x` bin locations generated from the histogram to the center of bins.
+		3. Calculate the value of the fitted `pdf(x)` for each of the bins in `x`.
+		4. Determine the residual sum of the squares, $SS_{error}$, and total sum of squares, $SS_{yy}$, according 
+		to the equations in rainfall-variability.ipynb.
+	"""
+
+	# Step 1. Fit the distribution.
+	distribution = st.expon
+	params = distribution.fit(data, loc=0) # Force the distribution to be built off of zero
+
+	arg = params[:-2]
+	loc = params[-2]
+	scale = params[-1]
+
+	y, x = np.histogram(data, bins=30, density=True)
+
+	# Step 2. Shift the x bin locations to the center of bins.
+	x = (x + np.roll(x, -1))[:-1] / 2.0
+
+	# Step 3. Calculate the values of pdx(x) for all x.
+	pdf = distribution.pdf(x, loc=loc, scale=scale, *arg)
+
+	# Step 4. Determine the residual and total sum of the squares.
+	ss_error = np.sum(np.power(y - pdf, 2.0))
+	ss_yy = np.sum(np.power(y - y.mean(), 2.0))
+
+	r_2 = 1 - ( ss_error / ss_yy )
+
+	if r_2 < 0.9:
+		print("WARNING. r2 for {station} is {r_2}".format(
+			station=station,
+			r_2=r_2))
+
+	return r_2, pdf
+
+
+def make_climate_parameters(station='OL JOGI FARM'):
+
+	# Prepare the CETRAD dataset.
+	year_min = 30 # minimum number of years to consider for a valid climate record.
+
+	df = pd.read_csv("../data/CETRAD/CETRAD_rainfall.csv")  # Read in the raw csv data.
+
+	# Step 1. Convert text strings into datetime objects.
+	format = '%m/%d/%y' # Column RDate has data in M/D/YY
+	df['Datetime']=pd.to_datetime(df['RDate'], format=format) # Create a new column of datetime objects using RDate.
+
+	# 2. Step 2. Convert future dates inferred during the conversion back into 20th century dates.
+	# Python is a future-looking programming language, and assumes that 1/1/34 is Jan 1, 2034.
+	# We can fix this by finding all the dates in the future (dt > datetime.now()) and removing 100 years from
+	# their value. This requires using the relativedelta function, which handles weird stuff like leap years.
+	df['Datetime'] = df['Datetime'].map(lambda dt: dt+relativedelta(years=-100) if dt > datetime.now() else dt)
+
+	# Step 3. Extract the Year and Month from the Datetime to make aggregation easier.
+	df['Year'] = [dt.year for dt in df['Datetime']]
+	df['Month'] = [dt.month for dt in df['Datetime']]
+
+	n_years = len(df['Year'].unique())
+
+	# Check to make sure we have enough data for fitting and parameter estimation.
+	if n_years < year_min:
+		print("WARNING! Station record for {station} has only {n_years} years.".format(
+			station=station,
+			n_years=n_years))
+
+	# Step 4. Use the Datetime values as the index for this dataframe.
+	df = df.set_index(pd.DatetimeIndex(df['Datetime']))  # Set the Datetime column as the dataframe index
+
+	# Step 5.  Delete the old RDate column, which we no longer need. 
+	# We will keep the Datetime column, in case we need it later.
+	df = df.drop(['RDate'], axis=1)
+
+	columns = [station] + ['Year', 'Month', 'Datetime']
+	rainfall = df[columns]
+
+	# First, find all the rows in the data where it rained and group by month.
+	rain_days = rainfall.loc[rainfall[station] > 0]
+
+	# Find all locations in the data where an observation was made.
+	all_days = rainfall.loc[rainfall[station] >= 0]
+
+	# Find just the rainfall amounts on days that it rained.
+	data = rainfall.loc[rainfall[station] > 0][station]
+	
+	# Fit the daily rainfall amounts to an exponential distribution.
+	check_exponential(data)
+
+	# Determine the Monthly values of alpha and lambda from the station data:
+	lambda_by_month = (
+	    rain_days.groupby('Month')[station].count() /
+	    all_days.groupby('Month')[station].count()
+	); print(lambda_by_month)
+
+	alpha_by_month = rain_days.groupby('Month')[station].mean()
+
+	# MAKE THE CLIMATE PARAMETER DICT:
+	climate = pd.DataFrame(alpha_by_month)
+	climate = climate.rename(columns={station: 'alpha_by_month'})
+	climate['lambda_by_month'] = lambda_by_month
+
+	return climate['alpha_by_month'].to_list(), climate['lambda_by_month'].to_list(), rainfall
+
+
+=======
+>>>>>>> 03e901013bc527c87c0f6c82e7a78f675ecc9021
 @functools.lru_cache(maxsize=128)
 def average_soil_moisture(model, n_sims=100, t_before=60, doy=None):
 
@@ -68,7 +200,7 @@ def calc_yield(stress=None, max_yield = 4680):
 # TODO: Consider moving plotting functions into their own script.
 def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, data = None, 
                         ann_x = 101, ann_y = 4500, 
-                        x_lab = 'X label here', y_lab = 'Y label here', title = 'Title here', positive = True):
+                        x_lab = 'X label here', y_lab = 'Y label here', title = 'Title here', positive = True, plot = False):
     """ Computes linear regression between independent and dependent variable. 
     Usage: plot_lin_regression(x_var, y_var, x_lab, y_lab, title)
         ann_x = where on x-axis annotation should be placed
@@ -85,18 +217,36 @@ def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, 
 
     y_pred = m*X + b
 
-    plt.figure(figsize=(5,4))
+    if plot == False:
+        # Calculate residuals
+        res = y - y_pred
+        tot = y - y.mean()
 
-    g = sns.lmplot(x_str, y_str, data, ci=95, height=4, scatter_kws={'color':'black','alpha':0.6}) # ,, line_kws={'color': 'black'}
-    
-    # Calculate residuals
-    res = y - y_pred
-    tot = y - y.mean()
+        R_squared = 1 - res.dot(res) / tot.dot(tot)
 
-    R_squared = 1 - res.dot(res) / tot.dot(tot)
-    print(R_squared)
-    print('m',m)
-    print('b',b)
+    else:
+        plt.figure(figsize=(5,4))
+
+        g = sns.lmplot(x_str, y_str, data, ci=95, height=4, scatter_kws={'color':'black','alpha':0.6}) # ,, line_kws={'color': 'black'}
+     
+        # Calculate residuals
+        res = y - y_pred
+        tot = y - y.mean()
+
+        R_squared = 1 - res.dot(res) / tot.dot(tot)
+        print(R_squared)
+        print('m',m)
+        print('b',b)
+
+        props = dict(boxstyle='square', facecolor='white', alpha=0.5, lw = 1.5) # , ec="b"
+
+        # place a text box in upper left in axes coords
+        plt.text(ann_x, ann_y, textstr, fontsize=10, #transform=ax.transAxes, 
+                verticalalignment='top', bbox=props)
+
+        plt.xlabel(x_lab)
+        plt.ylabel(y_lab)
+        plt.title(title, fontweight="bold")
     
     if positive == True:
         textstr = '\n'.join((
@@ -106,16 +256,6 @@ def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, 
         textstr = '\n'.join((
         r'$ y = %.2f$x' % (m, )+'$  %2.0f$' % (b, ),
         r'$r^2 = %.2f$' % (R_squared, )))
-
-    props = dict(boxstyle='square', facecolor='white', alpha=0.5, lw = 1.5) # , ec="b"
-
-    # place a text box in upper left in axes coords
-    plt.text(ann_x, ann_y, textstr, fontsize=10, #transform=ax.transAxes, 
-            verticalalignment='top', bbox=props)
-    
-    plt.xlabel(x_lab)
-    plt.ylabel(y_lab)
-    plt.title(title, fontweight="bold")
 
     return R_squared, m, b
 
@@ -260,3 +400,26 @@ def plot_polyfit(x=None, y=None, degree=None, x_lab='Seasonal rainfall (mm)',y_l
     results['polynomial'][0]
 
     # TODO: confidence intervals around line?
+
+
+def evolved_calc_yield(dtm=None, m=None, b=None):
+    yield_kg_ha = m*dtm + b
+
+    if dtm > 185:
+        raise ValueError("days to maturity, {dtm} is larger than 175".format(
+                dtm=dtm))
+    if dtm < 68:
+        raise ValueError("days to maturity, {dtm} is less than 68".format(
+                dtm=dtm))
+
+    return yield_kg_ha
+
+# verified using Kenya Seed Co. - https://web.archive.org/web/20190819125927/http://kenyaseed.com/gallery/maize/
+verified_hybrid_data = pd.read_csv('../data/Yields/hybrid_yields_verified.csv')
+
+# convert to metric tons
+verified_hybrid_data['yield_metric_tons'] = verified_hybrid_data.verified_yield_kg_acre/1000
+p, m, b = plot_lin_regression(verified_hybrid_data.verified_days_to_maturity, verified_hybrid_data.yield_metric_tons, 
+                             'verified_days_to_maturity', 'yield_metric_tons', verified_hybrid_data, 
+                             85, 4.9, 'Days to Maturity (days)', 'Yield (tons/ha)', 
+                             'Potential Maize Yields from Kenya Seed Company', positive=False)

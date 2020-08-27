@@ -54,7 +54,7 @@ class Crop(Plant):
         'T_MAX':4.0         # Max Crop Water Use [mm/day]
 
     """
-    def __init__(self, KC_MAX=1.2, LAI_MAX=3.0, T_MAX=4, lgp = 180, F1 = 0.2, F2 = 0.5, F3 = 0.75, 
+    def __init__(self, KC_MAX=1.2, LAI_MAX=3.0, T_MAX=4, lgp = 180, F1 = 0.16, F2 = 0.44, F3 = 0.76, 
                  EOS = 1.0, KC_INI = 0.30, KC_EOS = 0.6,*args,**kwargs):
 
         self.KC_MAX = KC_MAX      # Maximum crop coefficient; Kc at Reproductive Stage [0-1]
@@ -68,8 +68,6 @@ class Crop(Plant):
         self.KC_INI = KC_INI      # Kc at Initial Stage
         self.KC_EOS = KC_EOS      # Kc at End of Season
         super(Crop, self).__init__(*args, **kwargs)
-
-        # TODO check that when you change the lgp in model initialization that the kc value changes
 
     def calc_kc(self, day_of_season=0):
         """ Calculates crop coefficient that varies throughout the season 
@@ -93,7 +91,7 @@ class Crop(Plant):
         elif day_of_season <= self.lgp*self.F3:
             return self.KC_MAX
         elif day_of_season < self.lgp*self.EOS:
-            return self.KC_INI+((day_of_season-self.EOS*self.lgp)/(self.F3*self.lgp-self.EOS*self.lgp))*self.KC_EOS+self.KC_INI
+            return ((self.KC_EOS-self.KC_MAX)/(self.EOS*self.lgp-self.F3*self.lgp))*(day_of_season-self.F3*self.lgp)+self.KC_MAX
         else:
             return self.KC_EOS
 
