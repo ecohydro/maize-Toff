@@ -20,6 +20,8 @@ datetimes = np.arange(
 
 month_value_by_day = np.array([datetime.month for datetime in datetimes])
 week_value_by_day = np.array([datetime.isocalendar()[1] for datetime in datetimes])
+dekad_value_by_day = np.array([datetime.timetuple().tm_yday//10+1 for datetime in datetimes]) #TODO Check the first dekad
+# TODO Add semi_month_value_by_day
 
 
 def check_exponential(data):
@@ -88,15 +90,27 @@ def make_climate_parameters(
         station='OL JOGI FARM',
         data_file="data/CETRAD/CETRAD_rainfall.csv",
         year_min=30,
-        interval='month'):
-    """ 
+        interval='dekad'):
 
+    """ Defines function that takes a rainfall station time series and returns alpha and lambda values by 
+    a certain interval between week (7-days), dekad (10-days), semi-monthly (twice per month) or monthly.
 
-    TODO: WRITE DOCSTRINGS
+        Usage:
 
+            make_climate_parameters(
+                station='OL JOGI FARM', 
+                data_file="data/CETRAD/CETRAD_rainfall.csv",
+                year_min= 30,
+                interval='dekad' 
+            )
 
+        Default values:
+            station = 'OL JOGI FARM' [string] # Rainfall Climatology for Laikipia 
+            data_file = "data/CETRAD/CETRAD_rainfall.csv" # Path to file
+            year_min = 30 # Minimum number of years required in timeseries
+            interval = 'dekad' # Interval to calculate alphas andlambdas
 
-
+                returns alpha_values, lambda_values
     """
     # Prepare the CETRAD dataset.
     year_min = year_min # minimum number of years to consider for a valid climate record.
@@ -117,8 +131,11 @@ def make_climate_parameters(
     df['Year'] = [dt.year for dt in df['Datetime']]
     df['Month'] = [dt.month for dt in df['Datetime']]
     df['Week'] = [dt.week for dt in df['Datetime']]
-    # TODO: Create a column of decads for each row in rainfall record.
-
+    df['Semi_Month'] = (df['Datetime'].dt.day
+                          .gt((df['Datetime']+pd.tseries.offsets.MonthEnd()).dt.day//2) 
+                          + df['Month']*2 -1)
+    df['Dekad'] = df['Datetime'].dt.dayofyear//10+1
+    
     n_years = len(df['Year'].unique())
 
     # Check to make sure we have enough data for fitting and parameter estimation.
@@ -134,7 +151,7 @@ def make_climate_parameters(
     # We will keep the Datetime column, in case we need it later.
     df = df.drop(['RDate'], axis=1)
 
-    columns = [station] + ['Year', 'Month', 'Week', 'Datetime']
+    columns = [station] + ['Year', 'Month', 'Week', 'Dekad', 'Semi_Month','Datetime']
     rainfall = df[columns]
 
     # First, find all the rows in the data where it rained and group by month.
@@ -156,15 +173,19 @@ def make_climate_parameters(
             all_days.groupby('Month')[station].count()
         )
         alpha_values = rain_days.groupby('Month')[station].mean()
-    elif interval == 'week':
+    elif interval == 'dekad':
         lambda_values = (
-            rain_days.groupby('Week')[station].count() / 
-            all_days.groupby('Week')[station].count()
+            rain_days.groupby('Dekad')[station].count() / 
+            all_days.groupby('Dekad')[station].count()
         )
-        alpha_values = rain_days.groupby('Week')[station].mean()
-    elif interval == 'decad':
+        alpha_values = rain_days.groupby('Dekad')[station].mean()
+    elif interval == 'semi_month':
+        lambda_values = (
+            rain_days.groupby('Semi_Month')[station].count() / 
+            all_days.groupby('Semi_Month')[station].count()
+        )
+    else:
         raise(NotImplementedError)
-    # MAKE THE CLIMATE PARAMETER DICT:
 
     return alpha_values.to_list(), lambda_values.to_list()
 
@@ -209,9 +230,9 @@ class Climate():
                 alpha_r, lambda_r = make_climate_parameters(
                     station=kwargs['station'],
                     data_file=kwargs['data_file'],
-                    interval='week')
+                    interval=kwargs['interval'])
             else:
-                alpha_r, lambda_r = make_climate_parameters(station=kwargs['station'], interval='week')
+                alpha_r, lambda_r = make_climate_parameters(station=kwargs['station'], interval=kwargs['interval'])
         if isinstance(lambda_r, (float, int)):
             if isinstance(alpha_r, (float, int)):
                 # We have a constant value:
@@ -244,6 +265,17 @@ class Climate():
                     )
                 alpha_r_list = np.array(
                     [alpha_r[week_value-1] for week_value in week_value_by_day]
+                    )
+            else:
+                raise ValueError("lambda_r values and alpha_r values must be same length")
+        elif len(lambda_r) == 37:
+            if len(alpha_r) == 37:
+                # We have dekadal values (remember that python is zero-indexed)
+                lambda_r_list = np.array(
+                    [lambda_r[dekad_value-1] for dekad_value in dekad_value_by_day]
+                    )
+                alpha_r_list = np.array(
+                    [alpha_r[dekad_value-1] for dekad_value in dekad_value_by_day]
                     )
             else:
                 raise ValueError("lambda_r values and alpha_r values must be same length")
