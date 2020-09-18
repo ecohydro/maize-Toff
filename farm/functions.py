@@ -51,7 +51,7 @@ def average_soil_moisture(model, n_sims=100, t_before=60, doy=None):
 
     # Extract the final value of soil moisture from each output.
     values = pd.DataFrame([output[i]['s'][-1:] for i in np.arange(n_sims)])
-    return values.mean(), values.std()
+    return float(values.mean()), float(values.std())
 
 def calc_yield(stress=None, max_yield = 4680):
     yield_kg_ha = -max_yield*stress + max_yield
@@ -269,25 +269,35 @@ def plot_polyfit(x=None, y=None, degree=None, x_lab='Seasonal rainfall (mm)',y_l
 
     # TODO: confidence intervals around line?
 
-
+@functools.lru_cache(maxsize=64)
 def evolved_calc_yield(dtm=None, m=None, b=None):
-    yield_kg_ha = m*dtm + b
 
     if dtm > 185:
-        raise ValueError("days to maturity, {dtm} is larger than 175".format(
+        raise ValueError("days to maturity, {dtm} is larger than 185".format(
                 dtm=dtm))
     if dtm < 68:
         raise ValueError("days to maturity, {dtm} is less than 68".format(
                 dtm=dtm))
 
-    return yield_kg_ha
-
-# verified using Kenya Seed Co. - https://web.archive.org/web/20190819125927/http://kenyaseed.com/gallery/maize/
-verified_hybrid_data = pd.read_csv('../data/Yields/hybrid_yields_verified.csv')
-
-# convert to metric tons
-verified_hybrid_data['yield_metric_tons'] = verified_hybrid_data.verified_yield_kg_acre/1000
-p, m, b = plot_lin_regression(verified_hybrid_data.verified_days_to_maturity, verified_hybrid_data.yield_metric_tons, 
+    if not m or not b:
+        # verified using Kenya Seed Co. - https://web.archive.org/web/20190819125927/http://kenyaseed.com/gallery/maize/
+        verified_hybrid_data = pd.read_csv('../data/Yields/hybrid_yields_verified.csv')
+        verified_hybrid_data['yield_metric_tons'] = verified_hybrid_data.verified_yield_kg_acre/1000
+        p, m, b = plot_lin_regression(verified_hybrid_data.verified_days_to_maturity, verified_hybrid_data.yield_metric_tons, 
                              'verified_days_to_maturity', 'yield_metric_tons', verified_hybrid_data, 
                              85, 4.9, 'Days to Maturity (days)', 'Yield (tons/ha)', 
                              'Potential Maize Yields from Kenya Seed Company', positive=False)
+
+    yield_kg_ha = m*dtm + b
+
+    return yield_kg_ha
+
+# verified using Kenya Seed Co. - https://web.archive.org/web/20190819125927/http://kenyaseed.com/gallery/maize/
+#verified_hybrid_data = pd.read_csv('../data/Yields/hybrid_yields_verified.csv')
+
+# convert to metric tons
+#verified_hybrid_data['yield_metric_tons'] = verified_hybrid_data.verified_yield_kg_acre/1000
+#p, m, b = plot_lin_regression(verified_hybrid_data.verified_days_to_maturity, verified_hybrid_data.yield_metric_tons, 
+#                             'verified_days_to_maturity', 'yield_metric_tons', verified_hybrid_data, 
+#                             85, 4.9, 'Days to Maturity (days)', 'Yield (tons/ha)', 
+#                             'Potential Maize Yields from Kenya Seed Company', positive=False)
