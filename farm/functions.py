@@ -32,7 +32,6 @@ import functools
 from .climate import Climate
 from .model import CropModel
 
-<<<<<<< HEAD
 def check_exponential(data):
 
 	""" Defines function that fits daily rainfall amounts to an exponential distribution and returns pdf 
@@ -162,8 +161,6 @@ def make_climate_parameters(station='OL JOGI FARM'):
 	return climate['alpha_by_month'].to_list(), climate['lambda_by_month'].to_list(), rainfall
 
 
-=======
->>>>>>> 03e901013bc527c87c0f6c82e7a78f675ecc9021
 @functools.lru_cache(maxsize=128)
 def average_soil_moisture(model, n_sims=100, t_before=60, doy=None):
 
