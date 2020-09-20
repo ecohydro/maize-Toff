@@ -205,8 +205,8 @@ class Crop(Plant):
         
         '''
         # Step 0. Define variables
-        K_PAR = 0.2
-        R_PAR = 0.2 
+        K_PAR = 0.2 #0.2
+        R_PAR = 0.5 #0.2 
         INVL_SIMU = 1
 
         # Step 1. Calculate average static stress
