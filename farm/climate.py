@@ -20,8 +20,11 @@ datetimes = np.arange(
 
 month_value_by_day = np.array([datetime.month for datetime in datetimes])
 week_value_by_day = np.array([datetime.isocalendar()[1] for datetime in datetimes])
-dekad_value_by_day = np.array([datetime.timetuple().tm_yday//10+1 for datetime in datetimes]) #TODO Check the first dekad
-# TODO Add semi_month_value_by_day
+dekad_value_by_day = np.array([datetime.timetuple().tm_yday//10+1 for datetime in datetimes])
+# In the previous line of code, the first dekad is not repeated 10  times, so this works as a workaround:
+dekad_value_by_day=np.insert(dekad_value_by_day,0,1)
+dekad_value_by_day=np.delete(dekad_value_by_day,365)
+# TODO Add semi_month_value_by_day if using 
 
 
 def check_exponential(data):
@@ -158,7 +161,7 @@ def make_climate_parameters(
     rain_days = rainfall.loc[rainfall[station] > 0]
 
     # Find all locations in the data where an observation was made.
-    all_days = rainfall.loc[rainfall[station] >= 0]
+    all_days = rainfall.loc[rainfall[station] >= 0] 
 
     # Find just the rainfall amounts on days that it rained.
     data = rainfall.loc[rainfall[station] > 0][station]
