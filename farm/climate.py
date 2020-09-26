@@ -20,10 +20,7 @@ datetimes = np.arange(
 
 month_value_by_day = np.array([datetime.month for datetime in datetimes])
 week_value_by_day = np.array([datetime.isocalendar()[1] for datetime in datetimes])
-dekad_value_by_day = np.array([datetime.timetuple().tm_yday//10+1 for datetime in datetimes])
-# In the previous line of code, the first dekad is not repeated 10  times, so this works as a workaround:
-dekad_value_by_day=np.insert(dekad_value_by_day,0,1)
-dekad_value_by_day=np.delete(dekad_value_by_day,365)
+dekad_value_by_day = np.array([(datetime_.timetuple().tm_yday - 1)//10+1 for datetime_ in datetimes])
 # TODO Add semi_month_value_by_day if using 
 
 
