@@ -90,7 +90,8 @@ def make_climate_parameters(
         station='OL JOGI FARM',
         data_file="data/CETRAD/CETRAD_rainfall.csv",
         year_min=30,
-        interval='dekad'):
+        interval='dekad',
+        do_std=False):
 
     """ Defines function that takes a rainfall station time series and returns alpha and lambda values by 
     a certain interval between week (7-days), dekad (10-days), semi-monthly (twice per month) or monthly.
@@ -168,27 +169,47 @@ def make_climate_parameters(
 
     if interval == 'month':
         # Determine the Monthly values of alpha and lambda from the station data:
-        lambda_values = (
-            rain_days.groupby('Month')[station].count() /
-            all_days.groupby('Month')[station].count()
-        )
+        s = pd.DataFrame(
+            rain_days.groupby(['Month', 'Year'])[station].count().unstack(fill_value=0).stack() /
+            all_days.groupby(['Month', 'Year'])[station].count()
+        )[0]
+        df = pd.DataFrame(s).reset_index()
+        df.columns = ['Month', 'Year', 'Value']
+        avg_lambda_values = df.groupby('Month')['Value'].mean()
+        if do_std:
+            std_lambda_values = df.groupby('Month')['Value'].std()
+        else:
+            std_lambda_values = avg_lambda_values * 0.0
         alpha_values = rain_days.groupby('Month')[station].mean()
     elif interval == 'dekad':
-        lambda_values = (
-            rain_days.groupby('Dekad')[station].count() / 
-            all_days.groupby('Dekad')[station].count()
-        )
+        s = pd.DataFrame(
+            rain_days.groupby(['Dekad', 'Year'])[station].count().unstack(fill_value=0).stack() / 
+            all_days.groupby(['Dekad', 'Year'])[station].count()
+        )[0]
+        df = pd.DataFrame(s).reset_index()
+        df.columns = ['Dekad', 'Year', 'Value']
+        avg_lambda_values = df.groupby('Dekad')['Value'].mean()
+        if do_std:
+            std_lambda_values = df.groupby('Dekad')['Value'].std()
+        else:
+            std_lambda_values = avg_lambda_values * 0.0
         alpha_values = rain_days.groupby('Dekad')[station].mean()
     elif interval == 'semi_month':
-        lambda_values = (
-            rain_days.groupby('Semi_Month')[station].count() / 
-            all_days.groupby('Semi_Month')[station].count()
-        )
+        s = pd.DataFrame(
+            rain_days.groupby(['Semi_Month', 'Year'])[station].count().unstack(fill_value=0).stack() / 
+            all_days.groupby(['Semi_Month', 'Year'])[station].count()
+        )[0]
+        df = pd.DataFrame(s).reset_index()
+        df.columns = ['Semi_Month', 'Year', 'Value']
+        avg_lambda_values = df.groupby['Dekad']['Value'].mean()
+        if do_std:
+            std_lambda_values = df.groupby['Dekad']['Value'].std()
+        else:
+            std_lambda_values = avg_lambda_values * 0.0
     else:
         raise(NotImplementedError)
 
-    return alpha_values.to_list(), lambda_values.to_list()
-
+    return alpha_values.to_list(), avg_lambda_values.to_list(), std_lambda_values.to_list()
 
 # Should we rename this?
 class Climate():
@@ -210,9 +231,9 @@ class Climate():
     or have length of tseas (discrete rainfall probabilities each day.
 
     """
-    def __init__(self, alpha_r=[10.0] * 12, lambda_r=[0.25] * 12, ET_max=6.5, **kwargs):
-        
-       
+    def __init__(self,
+        alpha_r=[10.0] * 12, lambda_r=[0.25] * 12,
+        lambda_std=[0.0]*12, ET_max=6.5, do_std=False, **kwargs):
 
         self.ET_max = ET_max
         
@@ -227,23 +248,29 @@ class Climate():
         # 3. has length of 12, which means we have specified monthly values.
         if 'station' in kwargs:
             if 'data_file' in kwargs:
-                alpha_r, lambda_r = make_climate_parameters(
+                alpha_r, lambda_r, lambda_std = make_climate_parameters(
                     station=kwargs['station'],
                     data_file=kwargs['data_file'],
-                    interval=kwargs['interval'])
+                    interval=kwargs['interval'],
+                    do_std=do_std)
             else:
-                alpha_r, lambda_r = make_climate_parameters(station=kwargs['station'], interval=kwargs['interval'])
+                alpha_r, lambda_r, lambda_std = make_climate_parameters(
+                    station=kwargs['station'],
+                    interval=kwargs['interval'],
+                    do_std=do_std)
         if isinstance(lambda_r, (float, int)):
             if isinstance(alpha_r, (float, int)):
                 # We have a constant value:
                 lambda_r_list = [lambda_r] * 365
                 alpha_r_list = [alpha_r] * 365
+                lambda_std_list = [lambda_std] * 365
             else:
                 raise ValueError("lambda_r values and alpha_r values must be same length")
         elif len(lambda_r) == 365:
             if len(alpha_r) == 365:
                 lambda_r_list = lambda_r
                 alpha_r_list = alpha_r
+                lambda_std_list = lambda_std
             else:
                 raise ValueError("lambda_r values and alpha_r values must be same length")
         elif len(lambda_r) == 12:
@@ -254,6 +281,9 @@ class Climate():
                     )
                 alpha_r_list = np.array(
                     [alpha_r[month_value-1] for month_value in month_value_by_day]
+                    )
+                lambda_std_list = np.array(
+                    [lambda_std[month_value-1] for month_value in month_value_by_day]
                     )
             else:
                 raise ValueError("lambda_r values and alpha_r values must be same length")
@@ -266,6 +296,9 @@ class Climate():
                 alpha_r_list = np.array(
                     [alpha_r[week_value-1] for week_value in week_value_by_day]
                     )
+                lambda_std_list = np.array(
+                    [lambda_std[week_value-1] for week_value in week_value_by_day]
+                    )
             else:
                 raise ValueError("lambda_r values and alpha_r values must be same length")
         elif len(lambda_r) == 37:
@@ -277,6 +310,9 @@ class Climate():
                 alpha_r_list = np.array(
                     [alpha_r[dekad_value-1] for dekad_value in dekad_value_by_day]
                     )
+                lambda_std_list = np.array(
+                    [lambda_std[dekad_value-1] for dekad_value in dekad_value_by_day]
+                    )
             else:
                 raise ValueError("lambda_r values and alpha_r values must be same length")
         else:
@@ -286,8 +322,15 @@ class Climate():
 
         # Set the rainfall parameters for this instance
         self.alpha_r = alpha_r_list
-        self.lambda_r = lambda_r_list
-        
+        self.lambda_std = lambda_std_list
+        # Get std value for this rainfall.
+        # Let's use 1/5 of a standard distribution to limit variability.
+        # This seemed to look okay...
+        self.rain_std = np.random.normal()/5
+        #print(self.lambda_std)
+        #print(self.rain_std)
+        self.lambda_r = lambda_r_list + (self.rain_std * np.array(self.lambda_std))
+        self.lambda_r[self.lambda_r<0] = 0
         # Use the static method, generate, to create this instance's rainfall.
         self.rainfall = self.generate(self.alpha_r, self.lambda_r)
 
