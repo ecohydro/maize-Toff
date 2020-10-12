@@ -324,9 +324,9 @@ class Climate():
         self.alpha_r = alpha_r_list
         self.lambda_std = lambda_std_list
         # Get std value for this rainfall.
-        # Let's use 1/5 of a standard distribution to limit variability.
+        # Let's use a std. dev of 1/5 to limit variability.
         # This seemed to look okay...
-        self.rain_std = np.random.normal()/5
+        self.rain_std = np.random.normal(scale=0.2)
         #print(self.lambda_std)
         #print(self.rain_std)
         self.lambda_r = lambda_r_list + (self.rain_std * np.array(self.lambda_std))
