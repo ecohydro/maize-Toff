@@ -37,7 +37,8 @@ def average_soil_moisture(model, n_sims=100, t_before=60, doy=None):
 
     alpha_r = model.climate.alpha_r
     lambda_r = model.climate.lambda_r
-    climates = [Climate(alpha_r, lambda_r) for sim in np.arange(n_sims)]
+    lambda_std = model.climate.lambda_std
+    climates = [Climate(alpha_r, lambda_r, lambda_std) for sim in np.arange(n_sims)]
     
     # Create a temporary crop object with a 0 day length of growing period.
     temp_crop = copy.copy(model.crop)
