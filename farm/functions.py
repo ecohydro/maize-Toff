@@ -273,7 +273,7 @@ def plot_polyfit(x=None, y=None, degree=None, x_lab='Seasonal rainfall (mm)',y_l
 @functools.lru_cache(maxsize=64)
 def evolved_calc_yield(dtm=None, m=None, b=None):
 
-    if dtm > 185:
+    if dtm > 365: # temporary
         raise ValueError("days to maturity, {dtm} is larger than 185".format(
                 dtm=dtm))
     if dtm < 68:
