@@ -326,11 +326,15 @@ class Climate():
         # Get std value for this rainfall.
         # Let's use a std. dev of 1/5 to limit variability.
         # This seemed to look okay...
-        self.rain_std = np.random.normal(scale=0.2)
-        #print(self.lambda_std)
-        #print(self.rain_std)
-        self.lambda_r = lambda_r_list + (self.rain_std * np.array(self.lambda_std))
-        self.lambda_r[self.lambda_r<0] = 0
+        if do_std:
+            # return a random scaling factor with mean 1.
+            self.rain_std = np.random.normal(scale=0.2) + 1
+        else:
+            # return a scaling factor that is always 1:
+            self.rain_std = 1
+        # Use multiplicative noise to generate a wider variety of lambdas:
+        self.lambda_r = lambda_r_list * (self.rain_std)
+        
         # Use the static method, generate, to create this instance's rainfall.
         self.rainfall = self.generate(self.alpha_r, self.lambda_r)
 
