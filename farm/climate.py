@@ -21,8 +21,7 @@ datetimes = np.arange(
 month_value_by_day = np.array([datetime.month for datetime in datetimes])
 week_value_by_day = np.array([datetime.isocalendar()[1] for datetime in datetimes])
 dekad_value_by_day = np.array([(datetime_.timetuple().tm_yday - 1)//10+1 for datetime_ in datetimes])
-# TODO Add semi_month_value_by_day if using 
-
+# TODO Add semi_month_value_by_day if using it
 
 def check_exponential(data):
 
@@ -84,7 +83,6 @@ def check_exponential(data):
             r_2=r_2))
 
     return r_2, pdf
-
 
 def make_climate_parameters(
         station='OL JOGI FARM',
@@ -328,7 +326,7 @@ class Climate():
         # This seemed to look okay...
         if do_std:
             # return a random scaling factor with mean 1.
-            self.rain_std = np.random.normal(scale=0.2) + 1
+            self.rain_std = np.random.normal(scale=0.35) + 1
         else:
             # return a scaling factor that is always 1:
             self.rain_std = 1
@@ -348,11 +346,8 @@ class Climate():
 
         Usage: calc_E(s)
 
-            TODO: Update parameters.
-
             s = relative soil moisture [0-1]
-            E_max_p = E_max * exp(-k * LAI)
-            E = E_max * [(s-sh)/(1-sh)]^q
+            q = 1.5
 
         """
         if LAI == None:
@@ -374,7 +369,8 @@ class Climate():
 
             alpha_r = average storm depth [mm]
             lambda_r = storm frequency [day^-1]
-            t_seas = lenght of growing season [days]
+            t_sim = length of growing season [days]
+            doy_start = day of year to start the simulation [day] 
 
         Note: lambda must either be a single value (constant rainfall probability all season),
         or have length of tseas (discrete rainfall probabilities each day.
@@ -388,4 +384,3 @@ class Climate():
         amounts = [exponential(scale=alpha_r[doy-1], size=1)[0] for doy in doys]
         rain_days = [(uniform(low=0, high=1, size=1) <= lambda_r[doy-1] ).astype(int) for doy in doys]
         return np.multiply(amounts, [v[0] for v in rain_days])
-
