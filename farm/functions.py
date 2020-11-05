@@ -66,7 +66,6 @@ def calc_yield(stress=None, max_yield = 4680):
     
     return yield_kg_ha
 
-# TODO: Consider moving plotting functions into their own script.
 def plot_lin_regression(x_var = None, y_var = None, x_str = None, y_str = None, data = None, 
                         ann_x = 101, ann_y = 4500, 
                         x_lab = 'X label here', y_lab = 'Y label here', title = 'Title here', positive = True, plot = False):
@@ -268,12 +267,10 @@ def plot_polyfit(x=None, y=None, degree=None, x_lab='Seasonal rainfall (mm)',y_l
 
     results['polynomial'][0]
 
-    # TODO: confidence intervals around line?
-
 @functools.lru_cache(maxsize=64)
 def evolved_calc_yield(dtm=None, m=None, b=None):
 
-    if dtm > 365: # temporary
+    if dtm > 365: # When running full year's worth of sims, be sure to change this. Otherwise 185
         raise ValueError("days to maturity, {dtm} is larger than 185".format(
                 dtm=dtm))
     if dtm < 68:
