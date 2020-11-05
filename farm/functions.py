@@ -270,7 +270,7 @@ def plot_polyfit(x=None, y=None, degree=None, x_lab='Seasonal rainfall (mm)',y_l
 @functools.lru_cache(maxsize=64)
 def evolved_calc_yield(dtm=None, m=None, b=None):
 
-    if dtm > 365: # When running full year's worth of sims, be sure to change this. Otherwise 185
+    if dtm > 185: # When running full year's worth of sims, be sure to change this. Otherwise 185
         raise ValueError("days to maturity, {dtm} is larger than 185".format(
                 dtm=dtm))
     if dtm < 68:
