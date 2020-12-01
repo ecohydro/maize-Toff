@@ -113,7 +113,6 @@ venv.bak/
 
 # hidden dirs
 #py/
-/output
 /output/figures
 /output/dataframes
 /notebooks/tutorials
@@ -123,5 +122,10 @@ venv.bak/
 /output/6-results
 /output/final
 /R
-
+/output/2-past-cropping-outcomes
+/output/2-rainfall-variability
+/output/3-cv-translation
+/output/new_lambdas
+/output/new_lambdas_jacobson_farm
+/output/misc.
 .Rproj.user
