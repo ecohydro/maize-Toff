@@ -67,6 +67,7 @@ class CropModel():
         self.R = zeros(self.n_days)     # Will add in rainfall later
         self.s = zeros(self.n_days)     # [0-1]
         self.ET = zeros(self.n_days)    # [mm/day]
+        self.I = zeros(self.n_days)     # [mm/day]
         self.E = zeros(self.n_days)     # [mm/day]
         self.T = zeros(self.n_days)     # [mm/day]
         self.L = zeros(self.n_days)     # [mm/day]
@@ -193,12 +194,14 @@ class CropModel():
                 """
                 # Create temporary s and dsdt value for 
                 # use within timestep calculations:
-                _dsdt = self.R[t] - self.Q[t]         # mm/day
+                rainfall = max(self.R[t] - self.crop.calc_I(),0)
+                _dsdt = rainfall - self.Q[t]         # mm/day
                 _s = self.s[t] + _dsdt/self.nZr
                 
                 # 3. Calculate ET terms.
                 # Note: Use the temporary (intermediate) s value
                 # for this calculation rather than s[t].
+                self.I[t] = min(self.crop.calc_I(),self.R[t])
                 self.T[t] = self.crop.calc_T(
                     _s, LAI=self.LAI[t])   # mm/day
                 self.E[t] = self.climate.calc_E(
@@ -213,7 +216,7 @@ class CropModel():
                     _s, units='mm/day')
 
                 # 5. Update Soil Moisture Water Balance (Part 2)
-                self.dsdt[t] = self.R[t] - self.Q[t] - self.ET[t] - self.L[t]
+                self.dsdt[t] = rainfall - self.Q[t] - self.ET[t] - self.L[t]
                 self.s[t+1] = self.s[t] + self.dsdt[t]/self.nZr
                 # print(
                 #     f"Time: {t}\t s(t):{self.s[t]:.3f}\t"
@@ -235,6 +238,7 @@ class CropModel():
             'stress':self.stress,
             'R':self.R,
             's':self.s,
+            'I':self.I,
             'E':self.E,
             'ET':self.E + self.T,
             'T':self.T,

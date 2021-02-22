@@ -39,6 +39,9 @@ class Plant():
     def calc_T(self, s):
         raise NotImplementedError
 
+    def calc_I(self):
+        raise NotImplementedError
+
 #%%
 class Crop(Plant):
     """ Creates a Crop class.
@@ -158,6 +161,19 @@ class Crop(Plant):
                 return (s-self.sw)/(self.s_star-self.sw)*self.calc_T_MAX(kc)
             else:
                 return 0
+
+    def calc_I(self, int_efficiency=1):
+        """
+        Determines canopy interception based on crop LAI and
+        an interception efficiency term.
+
+        Usage: calc_I(LAI, int_efficiency)
+
+         ....
+
+            int_efficiency
+        """
+        return self.LAI * int_efficiency
 
     def calc_stress(self, s, q=2):
         """ Calculates static water stress.
