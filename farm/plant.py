@@ -21,7 +21,7 @@ class Plant():
         T_MAX=4,            # Maximum transpiration [mm/day]
         sw_MPa = -1.5,      # wilting point of plant in water potential [MPa]
         s_star_MPa = -0.05, # water potential of maximum transpiration [MPa], 
-        soil=None,          # a soil in which this plant will grow
+        soil=None          # a soil in which this plant will grow
     ):
         self.Zr = Zr
         self.sw_MPa = sw_MPa
