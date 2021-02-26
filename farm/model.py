@@ -194,14 +194,14 @@ class CropModel():
                 """
                 # Create temporary s and dsdt value for 
                 # use within timestep calculations:
-                rainfall = max(self.R[t] - self.crop.calc_I(),0)
+                rainfall = max(self.R[t] - self.crop.calc_I(self.LAI[t]),0)
                 _dsdt = rainfall - self.Q[t]         # mm/day
                 _s = self.s[t] + _dsdt/self.nZr
                 
                 # 3. Calculate ET terms.
                 # Note: Use the temporary (intermediate) s value
                 # for this calculation rather than s[t].
-                self.I[t] = min(self.crop.calc_I(),self.R[t])
+                self.I[t] = min(self.crop.calc_I(self.LAI[t]),self.R[t])
                 self.T[t] = self.crop.calc_T(
                     _s, LAI=self.LAI[t])   # mm/day
                 self.E[t] = self.climate.calc_E(
