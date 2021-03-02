@@ -1,0 +1,109 @@
+
+%--------------------------------------------------------------------%
+%                                                                    %
+%  PARAMETER TABLE                                                   %
+%                                                                    %
+%--------------------------------------------------------------------%
+\begin{table} %sideways
+\caption{Model parameters and their sources.} %  References noted in footnote when needed. 
+\label{table:parameters}
+\centering
+\begin{tabular}{lll l}
+\hline
+ Type & Parameter  & Value \\ % & Units 
+\hline
+ %Climate parameters &  $PET$ & 6 mm day$^{-1}$$^{a}$ \\ %& Potential Evapotranspiration 
+  % Barron paper found daily potential ET between 3.7 and 5.5 mm Machakos Kenya (1200m asl), so 6 is a little high by okay.
+   Climate parameters & $LGP$  & 180 days \\ %Length of season & \\ 
+\hline
+ Crop parameters &  $Z_{\text{r}}$  & 400 mm$^{a}$ \\ %& Rooting depth
+ & $T_\text{max}$  & 4.0 mm day$^{-1}$   \\ %& Maximum crop water use
+ & $ET_\text{max}$  & 6.5 mm day$^{-1}$$^{b}$ \\
+ & $K_{c, \text{max}}$ &  1.2 (dim)$^{c}$ \\ %& Maximum crop coefficient
+ & $LAI_\text{c}$  & 3.0 mm$^{2}$ mm$^{-2}$$^{d}$\\ %& Maximum Leaf Area Index
+ & $q_\text{e}$ & 1.5 (dim) \\
+ & $q_{\text{stress}}$ & 2 (dim) \\
+ & $r$ & 0.5 (dim)$^{e}$ \\ % r = 0.5 in \cite{Porporato2001-ui} p. 739 (square root term)
+ & $k$ & 0.2 (dim) \\ % k = 0.5 in \cite{Porporato2001-ui} p. 739
+ & $Y_\text{max}$ & 3.2 t ha$^{-1}$ \\
+ \hline
+ Soil parameters (clay loam) & $s_w$ & 0.53 (dim)$^{f}$ \\ %& Wilting point in saturation
+ & $s^*$ & 0.78 (dim)$^{f}$ \\ %& s star
+ % See Table 3 for more params.
+ \hline
+ Simulation parameters & $N_{\text{sim}}$ & 10,000 seasons \\
+ & $N_{\text{burn\_sim}}$  & 1,000 seasons \\ 
+ & $T_\text{burn}$ & 60 days \\
+ %% Extra variables, not including
+ %  $n$   & 0.40 m$^{3}$ m$^{-3}$  & \citeA{williams2004soil}  \\ %& Porosity
+ % $\rho$  & kg m$^{-3}$ & Density of water & 1000   \\
+ % $g$  & m s$^{-2}$ & Acceleration of gravity & 9.8   \\
+  %$K_s$ & cm min$^{-1}$ & Saturated hydraulic conductivity & 0.0417 &   %\citeA{clapp1978empirical} \\
+  %$s$  &  & Relative soil moisture & [0,1]   \\
+ % $s0$  &  & Initial soil moisture & 0.3   \\
+ % $sw_\text{MPA}$  & -1.5 MPa   \\ %& Wilting point in water potential
+  %$s^*_\text{MPA}$ & -0.05 MPa   \\ %& Water potential of maximum transpiration
+  %$s_h$  & 0.04 &  Porporato et al. 2003?  \\ %& Soil hygroscopic point
+  %$q$  &  & Exponent on the calc E curve & 1.5   \\
+ % field\verb!_!capacity   & MPa & Field capacity & -33/1000 & \citeA{clapp1978empirical}  \\
+  %$s_{fc}$ & 0.35 & Porporato et al. 2003?  \\ %& Field capacity
+  %$Psi_{S_cm}$ & cm & Saturated water tension &  \\  
+  %$Psi_{lcm}$ & cm & Leakage water tension &  \\  
+  %$S$ & cm min$^{\frac{1}{2}}$ & Sorptivity &  \\
+  %$\alpha$  & mm  & 10.0   \\ %& Average storm depth
+  %$\lambda$  & day$^{-1}$  & 0.25\\ %& Storm frequency
+  %$\xi$  & Plant water stress  & ...  \\
+  %$\beta$ & 12.5 & \citeA{Laio2001-fe}   \\
+\hline
+\multicolumn{2}{l}{$^{a}$\citeA{nyakudya2014effect}} \\
+\multicolumn{2}{l}{$^{b}$\citeA{barron2003dry}} \\
+\multicolumn{2}{l}{$^{c}$\citeA{allen1998chapter}} \\
+\multicolumn{2}{l}{$^{d}$\citeA{williams2004soil}} \\
+\multicolumn{2}{l}{$^{e}$\citeA{Porporato2001-ui}} \\
+\multicolumn{2}{l}{$^{f}$\citeA{clapp1978empirical}} \\
+\end{tabular}
+\end{table} %sideways
+
+% this doesn't seem necessary
+% \subsection{Probabilistic Description of Crop Development}
+% In water-limited environments, plants operate at the interface between soil properties and climate dynamics \cite{Rodriguez-Iturbe2001-un}. Plants are impacted by the arid conditions they are in as well as actively use available water, which alters the soil-water balance. In turn, plants play an active role in impacting the hydroclimatic environment through soil-atmosphere interactions. Though large and complex processes govern the hydroclimatic dynamics in water-limited environments, we adhered to a simplified model of crop water use that has been demonstrated a viable method under similar dryland conditions \cite{Rodriguez-Iturbe2001-un, laio2001plants, Porporato2001-ui}. To preserve the essential features while simultaneously simplifying assumptions of temporal dynamics of soil moisture, we implemented a numerical modeling scheme to understand the role of different maize varietals on soil moisture in response to water stress. 
+
+% The general form of the soil moisture balance follows... Co-author will add this section.
+
+In order to conserve the water balance, we implement the model piecewise. First, we calculate saturation excess, $Q(t)$, which is caused by an input of rainfall that leads to the soil moisture being above saturation (i.e. $s>1$). Then we then calculate both leakage and evapotranspiration using the same $s$ value and within the same time step. Lastly, once we have values of $L(t)$ and $ET(t)$, we update the water balance and the soil moisture. 
+
+We run the model for 10,000 simulations using the following initial conditions and parameters. We use the Ol Jogi Farm rainfall climatology (dekadal rainfall parameters estimated from daily rainfall records between 1967-1998), a clay loam soil texture, and 180-day maize variety, which are typical values for the study site. We selected a planting date of March 1 (Julian day 60) for model calibration and simulations. Farmers vary in their planting practice but generally plant at the start of the long rains after approximately 20 mm of rainfall has fallen. We selected March 1 because it was the most frequently planted week for the long rains among surveyed farmers in our study site. To determine the initial condition for our simulations, we first run the model for sixty days before the planting date and run 1,000 simulations to get an average value of $s$ for the first day of the season. Then we use this average value as the initial condition for each of our subsequent simulations of the growing season.
+
+\subsubsection{Impacts of maize variety on farming outcomes}
+
+To compare yield outcomes for different maize varieties, we run the simulations for three categories of varieties with different times to maturity that vary between 75 and 180 days: early maturing between 75 and 105 days, medium maturing between 110 and 140 days (inclusive), and late maturing between 145 to 180 days. Each category has 21 maize varieties, which are each simulated 500 times, resulting in 10,500 total simulations.
+
+\subsubsection{Impacts of rainfall climatologies on farming outcomes}
+
+We use two rainfall gauges to determine our $\alpha$ and $\lambda$ parameters, which are described in Table \ref{locations}. First, we use the long-term average Ol Jogi Farm rainfall climatology for running the model as this location is climatologically representative of semiarid small-scale producers in the region who depend on rainfall. We use this station for the model simulation results in sections \ref{non-stationarity} through \ref{cultivar_choice}.
+
+We use the longest station gauge record (79 years), Jacobson Farm rainfall climatology, to analyze temporal changes in crop production and crop failure. We define three eras of crop production: two extreme conditions (1930s rainfall climatology and 2010s rainfall climatology) and the average rainfall conditions. We extract dekadal $\alpha$ and $\lambda$ values as follows. To represent average annual change in either parameter, we use the average dekadal $\alpha$ and $\lambda$ values, which considers the entire rainfall record and corresponds to the climate in the middle of the record. We adjust the long-term average values for each dekad in order to obtain historical (1930s) or present (2010s) values of the parameters in each dekad. To estimate the past, ``1930s", dekadal $\alpha$ and $\lambda$ values we simply apply the trend line to each of the individual average dekads. For example, we calculate the dekadal $\alpha$ for the 1930s climatology by taking the average dekadal alpha and subtracting it by the slope of the trend line multiplied by 40 years. For the present ``2010s" values we add the slope of the trend line multiplied by 40 years.  We then use these three sets of $\alpha$ and $\lambda$ values to run the simulations for the three subsetted periods. We run 100,000 simulations for each period. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}
+\caption{Summary of rainfall statistics with gauge record lengths greater than 40 years (n = 39) for short rains (SR, March through May), long rains (LR, October through December) or both seasons. We computed a modified Mann-Kendall test to designate significant trends (p $<$ 0.05). Data source: CETRAD.}
+% Our results are consistent with \citeA{franz2010ecohydrological}): Total rainfall remains constant and increasing alpha and decreasing lambda trends for both seasons.
+\centering
+\begin{tabular}{llll l}
+\\\hline
+Parameter  & Season & Percent of stations  & Mean slope   & Standard  \\
+description  & & with significant   & of all stations & error of \\ 
+& & trends (p $<$ 0.05) & (Sen's method) & slopes \\
+\hline
+  Total rainfall [mm] & SR & 8.75 & 0.2863 & 0.4469 \\
+   Total rainfall [mm] & LR & 1.25 & -1.115 & 0.5240 \\
+   Annual rainfall [mm] & Both & 12.82 & -0.0673 & 0.6194 \\
+   Average rain per storm  $\alpha$ [mm] & SR & 20.00 & 0.0654 & 0.0153 \\
+  Average rain per storm  $\alpha$ [mm] & LR & 21.25 & 0.0641 & 0.0180 \\
+   Average arrival rate of rain  $\lambda$ [day$^{-1}$]  & SR & 33.75 & -0.0010 & 0.0006 \\
+   Average arrival rate of rain $\lambda$ [day$^{-1}$]  & LR & 32.50 & -0.0030 & 0.0005 
+\\\hline
+%\multicolumn{2}{l}{$^{a}$Footnote text here.}
+\end{tabular}
+\label{table:mk}
+\end{table}
