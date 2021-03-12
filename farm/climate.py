@@ -231,9 +231,10 @@ class Climate():
     """
     def __init__(self, 
         alpha_r=[10.0] * 12, lambda_r=[0.25] * 12, lambda_std=[0.0]*12, 
-        ET_max=6.5, do_std=False, **kwargs):
+        ET_max=6.5, do_std=False, q_e = 1.5, **kwargs):
 
         self.ET_max = ET_max
+        self.q_e = q_e
         
         # First check to see if we were passed a station. If
         # so, then try to get the climate parameters from the station 
@@ -343,7 +344,7 @@ class Climate():
             self.key = value
 
 
-    def calc_E(self, s, q=1.5, LAI=None, sh=None): 
+    def calc_E(self, s, LAI=None, sh=None): 
         """ Determines the daily evaporation as a function of relative soil moisture
 
         Usage: calc_E(s)
@@ -358,7 +359,7 @@ class Climate():
         k = 0.5
         E_max_p = self.ET_max*exp(-k*LAI) 
         if s >= sh:
-            return pow((s-sh)/(1-sh), q)*E_max_p
+            return pow((s-sh)/(1-sh), self.q_e)*E_max_p
         else:
             return 0
 
