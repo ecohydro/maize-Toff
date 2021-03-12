@@ -251,14 +251,13 @@ class Climate():
                     data_file=kwargs['data_file'],
                     interval=kwargs['interval'],
                     do_std=do_std)
-                print("this is a test")
+                print("Laikipia station data was inputted.")
             else:
                 alpha_r, lambda_r, lambda_std = make_climate_parameters(
                     station=kwargs['station'],
                     interval=kwargs['interval'],
                     do_std=do_std)
                 print("non-Laikipia station data was inputted. Using default alpha_r [10.0]*12 and lambda_r: [0.25]*12")
-        else:
         if isinstance(lambda_r, (float, int)):
             if isinstance(alpha_r, (float, int)):
                 # We have a constant value:
