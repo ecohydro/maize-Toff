@@ -58,7 +58,7 @@ class Crop(Plant):
 
     """
     def __init__(self, KC_MAX=1.2, LAI_MAX=3.0, T_MAX=4, lgp = 180, F1 = 0.16, F2 = 0.44, F3 = 0.76, 
-                 EOS = 1.0, KC_INI = 0.30, KC_EOS = 0.6,*args,**kwargs):
+                 EOS = 1.0, KC_INI = 0.30, KC_EOS = 0.6, q=2, *args,**kwargs):
 
         self.KC_MAX = KC_MAX      # Maximum crop coefficient; Kc at Reproductive Stage [0-1]
         self.LAI_MAX = LAI_MAX    # Maximum crop leaf area index [m^2/m^2]
@@ -70,6 +70,7 @@ class Crop(Plant):
         self.EOS = EOS            # Fraction of Season at End
         self.KC_INI = KC_INI      # Kc at Initial Stage
         self.KC_EOS = KC_EOS      # Kc at End of Season
+        self.q = q                # Q_stress for static stress calculation
         super(Crop, self).__init__(*args, **kwargs)
 
     def calc_kc(self, day_of_season=0):
@@ -173,9 +174,9 @@ class Crop(Plant):
             int_efficiency = conversion term [-].
 
         """
-        return LAI * int_efficiency
+        return LAI * int_efficiency # 0 for no int
 
-    def calc_stress(self, s, q=2):
+    def calc_stress(self, s):
         """ Calculates static water stress.
 
         Usage: calc_stress(s, q=2)
@@ -191,7 +192,7 @@ class Crop(Plant):
         elif s >= self.s_star:
             stress = 0
         else:
-            stress = ((self.s_star - s)/(self.s_star - self.sw))**q
+            stress = ((self.s_star - s)/(self.s_star - self.sw))**self.q
         return stress
 
     def calc_dstress(self, s, stress, Y_MAX=4260):
