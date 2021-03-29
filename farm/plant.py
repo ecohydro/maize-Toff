@@ -222,7 +222,7 @@ class Crop(Plant):
         
         '''
         # Step 0. Define variables
-        K_PAR = 0.2 # Messed around with this value to make crop failure less likely 
+        K_PAR = 0.2 # K parameter is the portion of the season that crop can endure stress before it fails. 
         R_PAR = 0.5 # R parameter should not change since it is the square root term in Porporato et al. (2001) p. 739
         INVL_SIMU = 1
 
