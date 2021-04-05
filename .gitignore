@@ -130,3 +130,5 @@ venv.bak/
 /output/new_lambdas_jacobson_farm
 /output/misc.
 .Rproj.user
+/data/revisions
+/submitted

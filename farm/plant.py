@@ -195,7 +195,7 @@ class Crop(Plant):
             stress = ((self.s_star - s)/(self.s_star - self.sw))**self.q
         return stress
 
-    def calc_dstress(self, s, stress, Y_MAX=4260):
+    def calc_dstress(self, s, stress, Y_MAX=None): # Y_MAX was previously set to 4260 for 180 day crop
         '''Calculates dyamic water stress (theta) which is a measure of total water stress during the growing season
         as proposed in Porporato et al. (2001). Considers the duration and frequency of water defict periods below a 
         critical value. The function also calculates yield based on dynamic water stress and returns three items in a
@@ -205,6 +205,7 @@ class Crop(Plant):
 
             s = relative saturation [0-1]
             stress = static stress [0-1]
+            Y_MAX = None [t / ha]
 
         Default values:
             mstr_memb = average static stress [0-1]
@@ -220,9 +221,16 @@ class Crop(Plant):
             dstr_memb = (mstr_memb * mcrs_memb) / (K_PAR * self.lgp))**(ncrs_memb**-R_PAR) # dynamic water stress
             yield_kg_ha = Y_MAX * (1 - dstr_memb) # yield in kg per ha
         
+        Note: Y_max can be set to the potential yield of the variety of interest. During implementation we use the 
+        Y_max set by the linear regression based on the data from Kenya Seed Co. with this line of code
+        data = [crop.calc_dstress(s=df.s, stress=df.stress, Y_MAX = evolved_calc_yield(dtm=lgp)) for df in output]
+        
         '''
+        #if Y_MAX = NotImplementedError:
+        #        raise ValueError("lambda_r values and alpha_r values must be same length")
+
         # Step 0. Define variables
-        K_PAR = 0.2 # Messed around with this value to make crop failure less likely 
+        K_PAR = 0.25 # K parameter is the portion of the season that crop can endure stress before it fails. 
         R_PAR = 0.5 # R parameter should not change since it is the square root term in Porporato et al. (2001) p. 739
         INVL_SIMU = 1
 
