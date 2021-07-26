@@ -1,9 +1,6 @@
 # maize-Toff
 Repo for modeling analysis of maize yield variability and tradeoffs between yield and crop failure.
 
-## Research questions
-1. What are the tradeoffs between yield (i.e. cultivar or variety selection), planting date, and crop failure?
-
 ## Set-up
 Create fork of maize-Toff and git clone to local machine.
 
@@ -24,8 +21,6 @@ Note: To update dependecies in an existing environment, use `conda env update --
 
 ### output/
 * exported figures, results, etc.
-
-Draft of manuscript [here](https://drive.google.com/drive/folders/1uRBOhii9ca5uGy2ntIhcAtsCL4PKBGq-?usp=sharing).
 
 ## How to use this model
 
