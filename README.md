@@ -1,5 +1,5 @@
 # maize-Toff
-Repo for modeling analysis of maize yield variability and tradeoffs between yield and crop failure.
+Repository for ecohydrological modeling analysis of maize yield variability and tradeoffs between yield and crop failure. See article by Krell et al. (2021) "Consequences of dryland maize planting decisions under increased seasonal rainfall variability" in Water Resources Research (coming soon!). 
 
 ## Set-up
 Create fork of maize-Toff and git clone to local machine.
@@ -17,10 +17,13 @@ Note: To update dependecies in an existing environment, use `conda env update --
 * where models are stored
 
 ### data/
-* contains CETRAD rainfall data, maize variety info, survey info...
+* contains CETRAD rainfall data, maize variety info
 
 ### output/
-* exported figures, results, etc.
+* exported figures, results
+
+### notebooks/
+* contains notebook that generates figures from the manuscript
 
 ## How to use this model
 
@@ -131,6 +134,7 @@ The `model.output()` function returns all the simulation output structured as a 
 * `LAI` Time series of crop LAI
 * `R` Time series of daily rainfall [mm]
 * `s` Time series of daily relative soil moisture [0-1]
+* `I` Time series of daily interception [mm]
 * `E` Time series of daily soil evaporation [mm]
 * `T` Time series of daily plant transpiration [mm]
 * `L` Time series of soil leakage loss [mm]
@@ -158,7 +162,7 @@ From the root of the directory, run the following in the command line to put `fa
 
 ` pip install -e .`
 
-After that, run tests from the subdirectory `tests`:
+After that, run tests from the subdirectory `farm/tests`, for example:
 
 `nosetests -vv test_sand`
 
