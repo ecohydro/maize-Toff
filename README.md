@@ -1,5 +1,5 @@
 # maize-Toff
-Repo for modeling analysis of maize yield variability and tradeoffs between yield and crop failure.
+Repository for ecohydrological modeling analysis of maize yield variability and tradeoffs between yield and crop failure. See article by Krell et al. (2021) "Consequences of dryland maize planting decisions under increased seasonal rainfall variability" in Water Resources Research (coming soon!). 
 
 ## Set-up
 Create fork of maize-Toff and git clone to local machine.
